@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
+import { Toaster, toast } from "sonner";
 import { z } from "zod";
 
 const signUpSchema = z.object({
@@ -21,7 +21,6 @@ const signUpSchema = z.object({
 
 export function SignUpForm() {
   const router = useRouter();
-  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -72,74 +71,70 @@ export function SignUpForm() {
       });
 
       if (res.ok) {
-        toast({
-          variant: "success",
-          title: "Success",
-          description: "Account created successfully",
-        });
-
+        toast.success("Account created successfully");
         router.push("/home");
       } else {
         const data = await res.json();
         throw new Error(data.message);
       }
     } catch (error) {
-      toast({
-        variant: "error",
-        title: "Error",
-        description:
-          error instanceof Error ? error.message : "Something went wrong",
-      });
+      toast.error(error instanceof Error ? error.message : "Something went wrong");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <Input
-          type="text"
-          name="name"
-          placeholder="Name"
-          required
-          className={`w-full ${errors.name ? "border-red-500" : ""}`}
-        />
-        {errors.name && (
-          <p className="text-sm text-red-500 mt-1">{errors.name}</p>
-        )}
-      </div>
-      <div>
-        <Input
-          type="email"
-          name="email"
-          placeholder="Email"
-          required
-          className={`w-full ${errors.email ? "border-red-500" : ""}`}
-        />
-        {errors.email && (
-          <p className="text-sm text-red-500 mt-1">{errors.email}</p>
-        )}
-      </div>
-      <div>
-        <Input
-          type="password"
-          name="password"
-          placeholder="Password"
-          required
-          className={`w-full ${errors.password ? "border-red-500" : ""}`}
-        />
-        {errors.password && (
-          <p className="text-sm text-red-500 mt-1">{errors.password}</p>
-        )}
-        <p className="text-xs text-[#4A4E69] mt-1">
-          Password must be at least 8 characters and contain uppercase,
-          lowercase, and numbers
-        </p>
-      </div>
-      <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? "Creating account..." : "Sign Up"}
-      </Button>
-    </form>
+    <>
+      <Toaster />
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <Input
+            type="text"
+            name="name"
+            placeholder="Name"
+            required
+            className={`w-full text-[#FAF3DD] ${errors.name ? "border-red-500" : ""}`}
+          />
+          {errors.name && (
+            <p className="text-sm text-red-500 mt-1">{errors.name}</p>
+          )}
+        </div>
+        <div>
+          <Input
+            type="email"
+            name="email"
+            placeholder="Email"
+            required
+            className={`w-full text-[#FAF3DD] ${errors.email ? "border-red-500" : ""}`}
+          />
+          {errors.email && (
+            <p className="text-sm text-red-500 mt-1">{errors.email}</p>
+          )}
+        </div>
+        <div>
+          <Input
+            type="password"
+            name="password"
+            placeholder="Password"
+            required
+            className={`w-full text-[#FAF3DD] ${errors.password ? "border-red-500" : ""}`}
+          />
+          {errors.password && (
+            <p className="text-sm text-red-500 mt-1">{errors.password}</p>
+          )}
+          <p className="text-xs text-[#FBF2C0] mt-1">
+            Password must be at least 8 characters and contain uppercase, lowercase, and numbers
+          </p>
+        </div>
+        <Button
+          type="submit"
+          className="w-full cursor-pointer text-black bg-[#FAF3DD] hover:bg-[#e3dcc9]"
+          disabled={loading}
+        >
+          {loading ? "Creating account..." : "Sign Up"}
+        </Button>
+      </form>
+    </>
   );
 }

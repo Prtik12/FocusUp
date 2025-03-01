@@ -95,7 +95,7 @@ export function SignInForm() {
           name="email"
           placeholder="Email"
           required
-          className={`w-full ${errors.email ? 'border-red-500' : ''}`}
+          className={`w-full text-[#FAF3DD] ${errors.email ? 'border-red-500' : ''}`}
         />
         {errors.email && (
           <p className="text-sm text-red-500 mt-1">{errors.email}</p>
@@ -107,13 +107,13 @@ export function SignInForm() {
           name="password"
           placeholder="Password"
           required
-          className={`w-full ${errors.password ? 'border-red-500' : ''}`}
+          className={`w-full text-[#FAF3DD] ${errors.password ? 'border-red-500' : ''}`}
         />
         {errors.password && (
           <p className="text-sm text-red-500 mt-1">{errors.password}</p>
         )}
       </div>
-      <Button type="submit" className="w-full" disabled={loading}>
+      <Button type="submit" className="w-full cursor-pointer text-black bg-[#FAF3DD] hover:bg-[#e3dcc9]" disabled={loading}>
         {loading ? "Signing in..." : "Sign In"}
       </Button>
     </form>

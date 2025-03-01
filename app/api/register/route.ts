@@ -19,6 +19,7 @@ export async function POST(req: Request) {
       .single();
 
     if (existingUser) {
+
       return NextResponse.json({ message: "Email already registered" }, { status: 400 });
     }
 
