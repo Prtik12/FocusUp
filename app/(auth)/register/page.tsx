@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { Pangolin } from "next/font/google"
 import Link from "next/link"
-import { Toaster } from "@/components/ui/sonner"
 
 const pangolin = Pangolin({ weight: "400", subsets: ["latin"], display: "swap" });
 
@@ -22,7 +21,6 @@ export default function RegisterPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-6 sm:py-12 bg-[#FBF2C0] px-4 sm:px-6 lg:px-8">
-      <Toaster /> 
       <div className="w-full max-w-md">
         <h1 className={`${pangolin.className} text-2xl sm:text-4xl font-bold text-center text-[#48392A] mb-4 sm:mb-6`}>
           Create Your Account
