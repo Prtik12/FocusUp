@@ -4,18 +4,22 @@ import Link from "next/link";
 import { Pangolin } from "next/font/google";
 import { motion } from "framer-motion";
 import { FiArrowRight, FiLogIn } from "react-icons/fi";
+import Navbar from "@/components/Navbar";
 
 const pangolin = Pangolin({ weight: "400", subsets: ["latin"], display: "swap" });
 
 export default function LandingPage() {
   return (
     <main className="relative min-h-screen bg-[#FBF2C0] text-[#4A3628] flex flex-col items-center justify-center px-4 sm:px-6 overflow-hidden">
+      {/* Navbar */}
+      <Navbar />
+
       {/* Animated Title */}
       <motion.h1
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, ease: "easeOut" }}
-        className={`${pangolin.className} text-6xl sm:text-8xl font-bold text-center text-[#48392A] mb-4 sm:mb-6 relative`}
+        className={`${pangolin.className} text-6xl sm:text-8xl font-bold text-center text-[#48392A] mt-24 sm:mt-32 mb-4 sm:mb-6 relative`}
       >
         FocusUp{" "}
         <motion.span
