@@ -10,7 +10,7 @@ const pangolin = Pangolin({ weight: "400", subsets: ["latin"], display: "swap" }
 
 export default function LandingPage() {
   return (
-    <main className="relative min-h-screen bg-[#FBF2C0] text-[#4A3628] flex flex-col items-center justify-center px-4 sm:px-6 overflow-hidden">
+    <main className="relative min-h-screen bg-[#FBF2C0] dark:bg-[#4a3628] text-[#4A3628] dark:text-[#FAF3DD] flex flex-col items-center justify-center px-4 sm:px-6 overflow-hidden">
       {/* Navbar */}
       <Navbar />
 
@@ -19,13 +19,13 @@ export default function LandingPage() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, ease: "easeOut" }}
-        className={`${pangolin.className} text-6xl sm:text-8xl font-bold text-center text-[#48392A] mt-24 sm:mt-32 mb-4 sm:mb-6 relative`}
+        className={`${pangolin.className} text-6xl sm:text-8xl font-bold text-center text-[#48392A] dark:text-[#FAF3DD] mt-24 sm:mt-32 mb-4 sm:mb-6 relative`}
       >
         FocusUp{" "}
         <motion.span
           initial={{ scale: 1 }}
           animate={{ scale: [1, 1.3, 1] }}
-          transition={{ duration: 1, repeat: Infinity, repeatType: "reverse" }}
+          transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
           className="text-[#F96F5D] inline-block"
         >
           !
@@ -64,7 +64,7 @@ export default function LandingPage() {
           className="w-3/4 sm:w-auto"
         >
           <Link href="/signin">
-            <button className="border-2 border-[#4A3628] text-[#4A3628] px-4 py-2 sm:px-6 sm:py-3 rounded-lg text-xl sm:text-xl w-full sm:w-auto flex items-center justify-center gap-2 transition-all duration-300 hover:bg-[#4A3628] hover:text-[#FAF3DD] hover:scale-105">
+            <button className="border-2 border-[#4A3628] dark:border-[#FAF3DD] text-[#4A3628] dark:text-[#FAF3DD] px-4 py-2 sm:px-6 sm:py-3 rounded-lg text-xl sm:text-xl w-full sm:w-auto flex items-center justify-center gap-2 transition-all duration-300 hover:bg-[#4A3628] dark:hover:bg-[#FAF3DD] hover:text-[#FAF3DD] dark:hover:text-[#4A3628] hover:scale-105">
               Sign In <FiLogIn className="animate-bounce" />
             </button>
           </Link>
