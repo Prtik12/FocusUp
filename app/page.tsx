@@ -10,7 +10,7 @@ const pangolin = Pangolin({ weight: "400", subsets: ["latin"], display: "swap" }
 
 export default function LandingPage() {
   return (
-    <main className="relative min-h-screen bg-[#FBF2C0] dark:bg-[#4a3628] text-[#4A3628] dark:text-[#FAF3DD] flex flex-col items-center justify-center px-4 sm:px-6 overflow-hidden">
+    <main className="relative h-auto min-h-screen bg-[#FBF2C0] dark:bg-[#4a3628] text-[#4A3628] dark:text-[#FAF3DD] flex flex-col items-center justify-center px-4 sm:px-6 overflow-hidden">
       {/* Navbar */}
       <Navbar />
 

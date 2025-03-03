@@ -4,6 +4,13 @@
 
 @custom-variant dark (&:is(.dark *));
 
+html, body {
+  height: 100%;
+  overflow-y: auto;
+  background-color: black;
+}
+
+
 
 body {
   cursor: url('/Cursor.png'), auto;
