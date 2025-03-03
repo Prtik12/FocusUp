@@ -2,15 +2,14 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Pangolin } from "next/font/google";
-import { FiMenu, FiX, FiGithub, FiSun, FiMoon } from "react-icons/fi";
+import { FiGithub, FiSun, FiMoon } from "react-icons/fi";
 import { useTheme } from "@/providers/ThemeProviders";
 
 const pangolin = Pangolin({ weight: "400", subsets: ["latin"], display: "swap" });
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const [clientTheme, setClientTheme] = useState<string | null>(null);
 
@@ -37,35 +36,9 @@ export default function Navbar() {
           </motion.h1>
         </Link>
 
-        {/* Mobile Icons */}
-        <div className="flex items-center md:hidden space-x-4">
+        {/* Icons (Mobile + Desktop) */}
+        <div className="flex items-center space-x-4">
           {/* Theme Toggle */}
-          <button
-            onClick={toggleTheme}
-            className="text-2xl p-2 rounded-md transition hover:text-[#F96F5D]"
-          >
-            {clientTheme === "dark" ? <FiSun /> : <FiMoon />}
-          </button>
-
-          {/* GitHub Icon */}
-          <a
-            href="https://github.com/Prtik12/FocusUp"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-2xl transition hover:text-[#F96F5D]"
-          >
-            <FiGithub />
-          </a>
-
-          {/* Mobile Menu Button */}
-          <button className="text-3xl" onClick={() => setIsOpen(!isOpen)}>
-            {isOpen ? <FiX /> : <FiMenu />}
-          </button>
-        </div>
-
-        {/* Desktop Buttons */}
-        <div className="hidden md:flex space-x-4 items-center">
-          {/* Dark Mode Toggle */}
           <button
             onClick={toggleTheme}
             className="text-2xl p-2 rounded-md transition hover:text-[#F96F5D]"
@@ -84,22 +57,6 @@ export default function Navbar() {
           </a>
         </div>
       </div>
-
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3 }}
-            className={`md:hidden flex flex-col items-center py-6 shadow-lg space-y-4 w-full ${
-              clientTheme === "dark" ? "bg-[#4a3628] text-[#FAF3DD]" : "bg-[#FBF2C0] text-[#4A3628]"
-            }`}
-          >
-            {/* Empty mobile menu (buttons removed) */}
-          </motion.div>
-        )}
-      </AnimatePresence>
     </nav>
   );
 }
