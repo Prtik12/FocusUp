@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Pangolin } from "next/font/google";
@@ -11,12 +11,18 @@ const pangolin = Pangolin({ weight: "400", subsets: ["latin"], display: "swap" }
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const { theme, toggleTheme } = useTheme(); // Get theme & toggle function
+  const { theme, toggleTheme } = useTheme();
+  const [clientTheme, setClientTheme] = useState<string | null>(null);
+
+  // Ensure theme consistency after hydration
+  useEffect(() => {
+    setClientTheme(theme);
+  }, [theme]);
 
   return (
     <nav
       className={`fixed top-0 left-0 w-full shadow-md z-50 ${
-        theme === "dark" ? "dark:bg-[#4a3628] dark:text-[#FAF3DD]" : "bg-[#FBF2C0] text-[#4A3628]"
+        clientTheme === "dark" ? "bg-[#4a3628] text-[#FAF3DD]" : "bg-[#FBF2C0] text-[#4A3628]"
       }`}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
@@ -24,7 +30,6 @@ export default function Navbar() {
         <Link href="/" className="flex items-center">
           <motion.h1
             className={`${pangolin.className} text-xl sm:text-2xl font-bold text-left`}
-            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
@@ -35,15 +40,15 @@ export default function Navbar() {
 
         {/* Mobile Icons */}
         <div className="flex items-center md:hidden space-x-4">
-          {/* Theme Toggle (Pushed to the Right) */}
+          {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
             className="text-2xl p-2 rounded-md transition hover:text-[#F96F5D]"
           >
-            {theme === "dark" ? <FiSun /> : <FiMoon />}
+            {clientTheme === "dark" ? <FiSun /> : <FiMoon />}
           </button>
 
-          {/* GitHub Icon (Now Outside the Mobile Menu) */}
+          {/* GitHub Icon */}
           <a
             href="https://github.com/Prtik12/FocusUp"
             target="_blank"
@@ -66,7 +71,7 @@ export default function Navbar() {
             onClick={toggleTheme}
             className="text-2xl p-2 rounded-md transition hover:text-[#F96F5D]"
           >
-            {theme === "dark" ? <FiSun /> : <FiMoon />}
+            {clientTheme === "dark" ? <FiSun /> : <FiMoon />}
           </button>
 
           <Link href="/signin">
@@ -94,12 +99,11 @@ export default function Navbar() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.3 }}
             className={`md:hidden flex flex-col items-center py-6 shadow-lg space-y-4 w-full ${
-              theme === "dark" ? "bg-[#4a3628] text-[#FAF3DD]" : "bg-[#FBF2C0] text-[#4A3628]"
+              clientTheme === "dark" ? "bg-[#4a3628] text-[#FAF3DD]" : "bg-[#FBF2C0] text-[#4A3628]"
             }`}
           >
             <div className="flex flex-col w-4/5 space-y-3">

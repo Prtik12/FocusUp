@@ -16,14 +16,14 @@ export default function LandingPage() {
 
       {/* Animated Title */}
       <motion.h1
-        initial={{ opacity: 0, y: -20 }}
+        initial={false} // Prevents SSR hydration issues
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, ease: "easeOut" }}
         className={`${pangolin.className} text-6xl sm:text-8xl font-bold text-center text-[#48392A] dark:text-[#FAF3DD] mt-24 sm:mt-32 mb-4 sm:mb-6 relative`}
       >
         FocusUp{" "}
         <motion.span
-          initial={{ scale: 1 }}
+          initial={false} // Prevents SSR hydration issues
           animate={{ scale: [1, 1.3, 1] }}
           transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
           className="text-[#F96F5D] inline-block"
@@ -43,32 +43,32 @@ export default function LandingPage() {
         className="mt-4 flex flex-col sm:flex-row gap-3 sm:gap-6 w-60 sm:w-auto items-center"
       >
         {/* Get Started Button */}
-        <motion.div
-          variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-          whileHover={{ scale: 1.08 }}
-          transition={{ type: "spring", stiffness: 300 }}
-          className="w-3/4 sm:w-auto"
-        >
-          <Link href="/register">
+        <Link href="/register">
+          <motion.div
+            variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+            whileHover={{ scale: 1.08 }}
+            transition={{ type: "spring", stiffness: 300 }}
+            className="w-3/4 sm:w-auto"
+          >
             <button className="bg-[#F96F5D] text-[#FAF3DD] px-4 py-2 sm:px-6 sm:py-3 rounded-lg text-xl sm:text-xl font-medium w-full sm:w-auto flex items-center justify-center gap-2 transition-all duration-300 hover:bg-[#e05b4d] hover:scale-105">
               Get Started <FiArrowRight className="animate-pulse" />
             </button>
-          </Link>
-        </motion.div>
+          </motion.div>
+        </Link>
 
         {/* Sign In Button */}
-        <motion.div
-          variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-          whileHover={{ scale: 1.08 }}
-          transition={{ type: "spring", stiffness: 300 }}
-          className="w-3/4 sm:w-auto"
-        >
-          <Link href="/signin">
+        <Link href="/signin">
+          <motion.div
+            variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+            whileHover={{ scale: 1.08 }}
+            transition={{ type: "spring", stiffness: 300 }}
+            className="w-3/4 sm:w-auto"
+          >
             <button className="border-2 border-[#4A3628] dark:border-[#FAF3DD] text-[#4A3628] dark:text-[#FAF3DD] px-4 py-2 sm:px-6 sm:py-3 rounded-lg text-xl sm:text-xl w-full sm:w-auto flex items-center justify-center gap-2 transition-all duration-300 hover:bg-[#4A3628] dark:hover:bg-[#FAF3DD] hover:text-[#FAF3DD] dark:hover:text-[#4A3628] hover:scale-105">
               Sign In <FiLogIn className="animate-bounce" />
             </button>
-          </Link>
-        </motion.div>
+          </motion.div>
+        </Link>
       </motion.div>
     </main>
   );
