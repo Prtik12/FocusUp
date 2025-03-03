@@ -40,7 +40,7 @@ export default function LandingPage() {
           hidden: { opacity: 0, y: 20 },
           visible: { opacity: 1, y: 0, transition: { staggerChildren: 0.2, delayChildren: 0.5 } },
         }}
-        className="mt-4 flex flex-col sm:flex-row gap-3 sm:gap-6 w-60 sm:w-auto items-center"
+        className="mt-4 flex flex-col sm:flex-row gap-3 sm:gap-6 w-full sm:w-auto items-center"
       >
         {/* Get Started Button */}
         <Link href="/register">
@@ -48,9 +48,9 @@ export default function LandingPage() {
             variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
             whileHover={{ scale: 1.08 }}
             transition={{ type: "spring", stiffness: 300 }}
-            className="w-3/4 sm:w-auto"
+            className="w-full max-w-xs sm:w-auto"
           >
-            <button className="bg-[#F96F5D] text-[#FAF3DD] px-4 py-2 sm:px-6 sm:py-3 rounded-lg text-xl sm:text-xl font-medium w-full sm:w-auto flex items-center justify-center gap-2 transition-all duration-300 hover:bg-[#e05b4d] hover:scale-105">
+            <button className="bg-[#F96F5D] text-[#FAF3DD] px-4 py-3 sm:px-6 sm:py-3 rounded-lg text-xl sm:text-xl font-medium w-full flex items-center justify-center gap-2 transition-all duration-300 hover:bg-[#e05b4d] hover:scale-105">
               Get Started <FiArrowRight className="animate-pulse" />
             </button>
           </motion.div>
@@ -62,9 +62,9 @@ export default function LandingPage() {
             variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
             whileHover={{ scale: 1.08 }}
             transition={{ type: "spring", stiffness: 300 }}
-            className="w-3/4 sm:w-auto"
+            className="w-full max-w-xs sm:w-auto"
           >
-            <button className="border-2 border-[#4A3628] dark:border-[#FAF3DD] text-[#4A3628] dark:text-[#FAF3DD] px-4 py-2 sm:px-6 sm:py-3 rounded-lg text-xl sm:text-xl w-full sm:w-auto flex items-center justify-center gap-2 transition-all duration-300 hover:bg-[#4A3628] dark:hover:bg-[#FAF3DD] hover:text-[#FAF3DD] dark:hover:text-[#4A3628] hover:scale-105">
+            <button className="border-2 border-[#4A3628] dark:border-[#FAF3DD] text-[#4A3628] dark:text-[#FAF3DD] px-4 py-3 sm:px-6 sm:py-3 rounded-lg text-xl sm:text-xl w-full flex items-center justify-center gap-2 transition-all duration-300 hover:bg-[#4A3628] dark:hover:bg-[#FAF3DD] hover:text-[#FAF3DD] dark:hover:text-[#4A3628] hover:scale-105">
               Sign In <FiLogIn className="animate-bounce" />
             </button>
           </motion.div>

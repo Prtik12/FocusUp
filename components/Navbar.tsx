@@ -14,7 +14,6 @@ export default function Navbar() {
   const { theme, toggleTheme } = useTheme();
   const [clientTheme, setClientTheme] = useState<string | null>(null);
 
-  // Ensure theme consistency after hydration
   useEffect(() => {
     setClientTheme(theme);
   }, [theme]);
@@ -74,16 +73,7 @@ export default function Navbar() {
             {clientTheme === "dark" ? <FiSun /> : <FiMoon />}
           </button>
 
-          <Link href="/signin">
-            <button className="border-2 border-[#4A3628] dark:border-[#FAF3DD] px-4 py-2 rounded-md transition hover:bg-[#4A3628] hover:text-[#FAF3DD] dark:hover:bg-[#FAF3DD] dark:hover:text-[#4A3628]">
-              Sign In
-            </button>
-          </Link>
-          <Link href="/register">
-            <button className="px-4 py-2 rounded-md transition bg-[#F96F5D] text-[#FAF3DD] hover:bg-[#e05b4d]">
-              Get Started
-            </button>
-          </Link>
+          {/* GitHub Icon */}
           <a
             href="https://github.com/Prtik12/FocusUp"
             target="_blank"
@@ -106,18 +96,7 @@ export default function Navbar() {
               clientTheme === "dark" ? "bg-[#4a3628] text-[#FAF3DD]" : "bg-[#FBF2C0] text-[#4A3628]"
             }`}
           >
-            <div className="flex flex-col w-4/5 space-y-3">
-              <Link href="/signin">
-                <button className="border-2 w-full px-4 py-3 rounded-md transition border-[#4A3628] dark:border-[#FAF3DD] hover:bg-[#4A3628] hover:text-[#FAF3DD] dark:hover:bg-[#FAF3DD] dark:hover:text-[#4A3628]">
-                  Sign In
-                </button>
-              </Link>
-              <Link href="/register">
-                <button className="w-full px-4 py-3 rounded-md transition bg-[#F96F5D] text-[#FAF3DD] hover:bg-[#e05b4d]">
-                  Get Started
-                </button>
-              </Link>
-            </div>
+            {/* Empty mobile menu (buttons removed) */}
           </motion.div>
         )}
       </AnimatePresence>
