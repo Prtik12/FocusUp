@@ -6,6 +6,14 @@ export async function POST(req: Request) {
   try {
     const { name, email, password } = await req.json();
 
+    // Validate inputs
+    if (!name || !email || !password) {
+      return NextResponse.json(
+        { message: "All fields are required" },
+        { status: 400 }
+      );
+    }
+
     // Check if the email already exists
     const existingUser = await prisma.user.findUnique({
       where: { email },
@@ -18,20 +26,21 @@ export async function POST(req: Request) {
       );
     }
 
-    // Hash the password
+    // Hash the password securely
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Insert user into database
-    await prisma.user.create({
+    // Create the user in the database
+    const newUser = await prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
       },
+      select: { id: true, email: true }, // Return only safe data
     });
 
     return NextResponse.json(
-      { message: "User registered successfully" },
+      { message: "User registered successfully", user: newUser },
       { status: 201 }
     );
   } catch (error) {

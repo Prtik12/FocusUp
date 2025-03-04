@@ -12,7 +12,7 @@ export default function Loader() {
       <motion.h1
         initial={{ opacity: 0, y: 20 }} // Starts lower and invisible
         animate={{ opacity: 1, y: 0 }} // Moves to final position
-        transition={{ duration: 1, ease: "easeOut" }}
+        transition={{ duration: 2, ease: "easeOut" }}
         className={`${pangolin.className} text-6xl sm:text-8xl font-bold text-center text-[#FAF3DD] mt-0 sm:mt-14 mb-4 sm:mb-6 relative`}
       >
         FocusUp{" "}

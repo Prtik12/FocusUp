@@ -1,89 +1,74 @@
-import { AuthOptions, DefaultSession } from "next-auth";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import prisma from "./prisma"; // Import the Prisma client
+import { NextAuthOptions } from "next-auth";
+import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { createClient } from "@supabase/supabase-js";
 import bcrypt from "bcryptjs";
 
-// Ensure environment variables are defined
-if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-  throw new Error("Missing Supabase environment variables");
-}
-
-// Initialize Supabase Client (Use anon key for client-side authentication)
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-
-declare module "next-auth" {
-  interface Session {
-    user: DefaultSession["user"] & {
-      id: string;
-    };
-  }
-}
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    id: string;
-  }
-}
-
-export const authOptions: AuthOptions = {
+export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma), // Connect Prisma Adapter
   providers: [
+    // Google OAuth
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+
+    // Credentials Authentication (Email & Password)
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "email", required: true },
-        password: { label: "Password", type: "password", required: true },
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Email and password are required.");
         }
 
-        // Fetch user from Supabase
-        const { data: user, error } = await supabase
-          .from("users")
-          .select("id, name, email, password")
-          .eq("email", credentials.email)
-          .single();
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email },
+        });
 
-        if (error || !user) {
-          console.error("User not found:", error);
-          throw new Error("Invalid credentials.");
+        if (!user || !user.password) {
+          throw new Error("Invalid email or password.");
         }
 
-        // Compare passwords
-        const passwordsMatch = await bcrypt.compare(credentials.password, user.password);
-        if (!passwordsMatch) {
-          throw new Error("Invalid credentials.");
+        const isValidPassword = await bcrypt.compare(credentials.password, user.password);
+        if (!isValidPassword) {
+          throw new Error("Invalid email or password.");
         }
 
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-        };
+        return user; // Return user object if successful
       },
     }),
   ],
+
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.email = user.email;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id;
+        session.user.id = token.id as string;
+        session.user.email = token.email as string;
       }
       return session;
     },
   },
+
   pages: {
     signIn: "/signin",
   },
+
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
+
   secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === "development",
 };

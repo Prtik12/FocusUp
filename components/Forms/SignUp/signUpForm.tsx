@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Toaster, toast } from "sonner";
@@ -70,13 +71,25 @@ export function SignUpForm() {
         }),
       });
 
-      if (res.ok) {
-        toast.success("Account created successfully");
-        router.push("/home");
-      } else {
+      if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.message);
+        throw new Error(data.message || "Failed to create account");
       }
+
+      toast.success("Account created successfully. Logging in...");
+
+      // Automatically log in the user after signup
+      const signInResponse = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
+      });
+
+      if (signInResponse?.error) {
+        throw new Error(signInResponse.error);
+      }
+
+      router.push("/home");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Something went wrong");
     } finally {
@@ -96,9 +109,7 @@ export function SignUpForm() {
             required
             className={`w-full text-[#FAF3DD] ${errors.name ? "border-red-500" : ""}`}
           />
-          {errors.name && (
-            <p className="text-sm text-red-500 mt-1">{errors.name}</p>
-          )}
+          {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name}</p>}
         </div>
         <div>
           <Input
@@ -108,9 +119,7 @@ export function SignUpForm() {
             required
             className={`w-full text-[#FAF3DD] ${errors.email ? "border-red-500" : ""}`}
           />
-          {errors.email && (
-            <p className="text-sm text-red-500 mt-1">{errors.email}</p>
-          )}
+          {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
         </div>
         <div>
           <Input
@@ -120,9 +129,7 @@ export function SignUpForm() {
             required
             className={`w-full text-[#FAF3DD] ${errors.password ? "border-red-500" : ""}`}
           />
-          {errors.password && (
-            <p className="text-sm text-red-500 mt-1">{errors.password}</p>
-          )}
+          {errors.password && <p className="text-sm text-red-500 mt-1">{errors.password}</p>}
           <p className="text-xs text-[#FBF2C0] mt-1">
             Password must be at least 8 characters and contain uppercase, lowercase, and numbers
           </p>

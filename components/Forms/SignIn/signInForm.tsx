@@ -5,8 +5,9 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
+import { Toaster, toast } from "sonner"; // Sonner for toasts
 import { z } from "zod";
+import { FcGoogle } from "react-icons/fc"; // Google logo
 
 const signInSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -15,7 +16,6 @@ const signInSchema = z.object({
 
 export function SignInForm() {
   const router = useRouter();
-  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -52,6 +52,28 @@ export function SignInForm() {
     }
 
     try {
+      // Check if the user exists before attempting sign-in
+      const userCheck = await fetch("/api/check-user", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const { userExists } = await userCheck.json();
+
+      if (!userExists) {
+        toast.warning("User Not Found", {
+          description: "Please sign up first.",
+        });
+
+        setTimeout(() => {
+          router.push("/register");
+        }, 2000);
+
+        return;
+      }
+
+      // Attempt to sign in
       const res = await signIn("credentials", {
         email,
         password,
@@ -59,28 +81,20 @@ export function SignInForm() {
       });
 
       if (res?.error) {
-        toast({
-          variant: "error",
-          title: "Error",
-          description: "Invalid credentials",
+        toast.error("Invalid Credentials", {
+          description: "The email or password you entered is incorrect.",
         });
         return;
       }
 
-      toast({
-        variant: "success",
-        title: "Success",
-        description: "Logged in successfully",
-      });
+      toast.success("Logged in successfully!");
 
       router.push("/home");
       router.refresh();
     } catch (error) {
-      console.error(error);
-      toast({
-        variant: "error",
-        title: "Error",
-        description: "Something went wrong",
+      console.error("Login Error:", error);
+      toast.error("User Not Found", {
+        description: "Please sign up first.",
       });
     } finally {
       setLoading(false);
@@ -95,11 +109,9 @@ export function SignInForm() {
           name="email"
           placeholder="Email"
           required
-          className={`w-full text-[#FAF3DD] ${errors.email ? 'border-red-500' : ''}`}
+          className={`w-full text-[#FAF3DD] ${errors.email ? "border-red-500" : ""}`}
         />
-        {errors.email && (
-          <p className="text-sm text-red-500 mt-1">{errors.email}</p>
-        )}
+        {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
       </div>
       <div>
         <Input
@@ -107,15 +119,31 @@ export function SignInForm() {
           name="password"
           placeholder="Password"
           required
-          className={`w-full text-[#FAF3DD] ${errors.password ? 'border-red-500' : ''}`}
+          className={`w-full text-[#FAF3DD] ${errors.password ? "border-red-500" : ""}`}
         />
-        {errors.password && (
-          <p className="text-sm text-red-500 mt-1">{errors.password}</p>
-        )}
+        {errors.password && <p className="text-sm text-red-500 mt-1">{errors.password}</p>}
       </div>
-      <Button type="submit" className="w-full cursor-pointer text-black bg-[#FAF3DD] hover:bg-[#e3dcc9]" disabled={loading}>
+      <Button
+        type="submit"
+        className="w-full cursor-pointer text-black bg-[#FAF3DD] hover:bg-[#e3dcc9]"
+        disabled={loading}
+      >
         {loading ? "Signing in..." : "Sign In"}
       </Button>
+
+      {/* Google Sign-In Button */}
+      <div className="flex justify-center">
+        <button
+          type="button"
+          onClick={() => signIn("google", { callbackUrl: "/home" })}
+          className="w-auto mt-2 flex items-center justify-center"
+        >
+          <FcGoogle className="h-6 w-6" />
+        </button>
+      </div>
+
+      {/* Sonner Toaster (placed at the bottom to ensure only one instance) */}
+      <Toaster position="bottom-right" richColors closeButton />
     </form>
   );
 }
