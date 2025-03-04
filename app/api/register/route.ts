@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import prisma from "@/lib/prisma"; // Import Prisma client
+import prisma from "@/lib/prisma";
 
 export async function POST(req: Request) {
   try {
     const { name, email, password } = await req.json();
 
-    // Validate inputs
     if (!name || !email || !password) {
       return NextResponse.json(
         { message: "All fields are required" },
@@ -14,7 +13,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Check if the email already exists
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
@@ -26,17 +24,15 @@ export async function POST(req: Request) {
       );
     }
 
-    // Hash the password securely
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create the user in the database
     const newUser = await prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
       },
-      select: { id: true, email: true }, // Return only safe data
+      select: { id: true, email: true },
     });
 
     return NextResponse.json(
