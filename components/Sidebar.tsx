@@ -25,25 +25,18 @@ export default function Sidebar() {
   const router = useRouter();
   const { data: session, status } = useSession();
 
-  // Detect screen size for mobile adjustments
   useEffect(() => {
     setIsMobile(window.innerWidth < 768);
   }, []);
 
-  // Redirect if no session
   useEffect(() => {
     if (status !== "loading" && !session) {
       router.push("/signin");
     }
   }, [session, status, router]);
 
-  // Loading state
   if (status === "loading") {
-    return (
-      <div className="h-screen w-20 bg-[#FBF2C0] dark:bg-[#4A3628] animate-pulse">
-        {/* Loading skeleton */}
-      </div>
-    );
+    return <div className="h-screen w-20 bg-[#FBF2C0] dark:bg-[#4A3628] animate-pulse"></div>;
   }
 
   const userName = session?.user?.name ?? "User";
@@ -59,11 +52,10 @@ export default function Sidebar() {
       animate={{ width: isExpanded ? 240 : 85 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
       className="h-screen bg-[#FBF2C0] text-[#4A3628] dark:bg-[#4A3628] dark:text-[#FAF3DD] 
-                 p-4 rounded-r-lg flex flex-col items-center fixed left-0 top-0"
+                 p-4 rounded-r-lg flex flex-col items-center fixed left-0 top-0 z-50"
       onMouseEnter={() => !isMobile && setIsExpanded(true)}
       onMouseLeave={() => !isMobile && setIsExpanded(false)}
     >
-      {/* Mobile Toggle Button */}
       <button
         className="md:hidden absolute top-4 left-4 text-[#4A3628] dark:text-[#FAF3DD]"
         onClick={() => setIsExpanded(!isExpanded)}
@@ -71,15 +63,8 @@ export default function Sidebar() {
         <HiMenuAlt2 size={28} />
       </button>
 
-      {/* User Info */}
       <div className="flex items-center w-full mb-5">
-        <Image
-          src={userImage}
-          alt="Profile"
-          width={48}
-          height={48}
-          className="rounded-full shrink-0"
-        />
+        <Image src={userImage} alt="Profile" width={48} height={48} className="rounded-full shrink-0" />
         <AnimatePresence>
           {isExpanded && (
             <motion.span
@@ -95,7 +80,6 @@ export default function Sidebar() {
         </AnimatePresence>
       </div>
 
-      {/* Edit Profile Button */}
       <div
         onClick={() => router.push("/profile")}
         className="w-full flex items-center p-3 mb-5 rounded-lg transition duration-300 
@@ -117,7 +101,6 @@ export default function Sidebar() {
         </AnimatePresence>
       </div>
 
-      {/* Navigation Items */}
       <nav className="w-full flex flex-col space-y-2">
         {sidebarItems.map(({ icon: Icon, label, path }) => (
           <div
@@ -148,9 +131,7 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* Theme Toggle and Logout */}
       <div className="mt-auto w-full space-y-2">
-        {/* Theme Toggle */}
         <div
           className="w-full flex items-center p-3 rounded-lg transition duration-300 cursor-pointer
                     hover:bg-[#E2C799] dark:hover:bg-[#5A4532] text-[#4A3628] dark:text-[#FAF3DD]"
@@ -172,7 +153,6 @@ export default function Sidebar() {
           </AnimatePresence>
         </div>
 
-        {/* Logout Button */}
         <div
           className="w-full flex items-center p-3 rounded-lg transition duration-300 cursor-pointer
                     hover:bg-[#E2C799] dark:hover:bg-[#5A4532] text-[#4A3628] dark:text-[#FAF3DD]"

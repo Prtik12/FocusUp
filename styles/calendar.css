@@ -1,0 +1,51 @@
+/* Make calendar larger */
+.custom-calendar {
+    width: 100%;
+    min-height: 350px;
+    background-color: #FAF3DD;
+    color: #4A3628;
+    border-radius: 12px;
+    padding: 20px;
+    font-size: 1.2rem;
+  }
+  
+  /* Dark mode */
+  .dark .custom-calendar {
+    background-color: #48392A;
+    color: #FAF3DD;
+    border: 1px solid #5A4532;
+  }
+  
+  /* Make the days and buttons larger */
+  .custom-calendar .react-calendar__tile {
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+  }
+  
+  .custom-calendar .react-calendar__navigation button {
+    font-size: 1.3rem;
+    padding: 8px;
+  }
+  
+  /* Ensure better touch accessibility */
+  .custom-calendar .react-calendar__tile:enabled:hover {
+    background-color: #F96F5D;
+    color: white;
+  }
+  
+  .custom-calendar .react-calendar__tile--active {
+    background-color: #F96F5D;
+    color: white;
+  }
+  
+  /* Highlight today */
+  .custom-calendar .react-calendar__tile--now {
+    background: #E2C799;
+    font-weight: bold;
+  }
+  
+  .dark .custom-calendar .react-calendar__tile--now {
+    background: #5A4532;
+  }
+  
