@@ -1,11 +1,12 @@
 /* Make calendar larger */
 .custom-calendar {
     width: 100%;
+    max-width: 350px;
     min-height: 350px;
     background-color: #FAF3DD;
     color: #4A3628;
     border-radius: 12px;
-    padding: 20px;
+    padding: 10px;
     font-size: 1.2rem;
   }
   
@@ -18,7 +19,7 @@
   
   /* Make the days and buttons larger */
   .custom-calendar .react-calendar__tile {
-    padding: 15px;
+    padding: 5px;
     border-radius: 8px;
     font-size: 1.1rem;
   }
