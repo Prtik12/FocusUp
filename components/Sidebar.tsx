@@ -6,7 +6,6 @@ import { useSession, signOut } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiUser, FiHome, FiSun, FiMoon, FiLogOut } from "react-icons/fi";
 import { BsJournalBookmark, BsClock, BsSticky } from "react-icons/bs";
-import { HiMenuAlt2 } from "react-icons/hi";
 import Image from "next/image";
 import { useTheme } from "@/providers/ThemeProviders";
 
@@ -18,15 +17,21 @@ const sidebarItems = [
 ];
 
 export default function Sidebar() {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const { data: session, status, update } = useSession();
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
   const router = useRouter();
-  const { data: session, status } = useSession();
+
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    setIsMobile(window.innerWidth < 768);
+    if (typeof window !== "undefined") {
+      setIsMobile(window.innerWidth < 768);
+      const handleResize = () => setIsMobile(window.innerWidth < 768);
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }
   }, []);
 
   useEffect(() => {
@@ -34,6 +39,11 @@ export default function Sidebar() {
       router.push("/signin");
     }
   }, [session, status, router]);
+
+  // Re-fetch session to get the latest user data after profile update
+  useEffect(() => {
+    update(); // Fetch new session data when sidebar mounts
+  }, []);
 
   if (status === "loading") {
     return <div className="h-screen w-20 bg-[#FBF2C0] dark:bg-[#4A3628] animate-pulse"></div>;
@@ -51,18 +61,12 @@ export default function Sidebar() {
       initial={{ width: 85 }}
       animate={{ width: isExpanded ? 240 : 85 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      className="h-screen bg-[#FBF2C0] text-[#4A3628] dark:bg-[#4A3628] dark:text-[#FAF3DD] 
-                 p-4 rounded-r-lg flex flex-col items-center fixed left-0 top-0 z-50"
+      className="h-screen border-r border-[#4A3628] dark:border-[#FAF3DD] bg-[#FBF2C0] text-[#4A3628] dark:bg-[#4A3628] dark:text-[#FAF3DD]
+                 p-4 flex flex-col fixed left-0 top-0 z-50"
       onMouseEnter={() => !isMobile && setIsExpanded(true)}
       onMouseLeave={() => !isMobile && setIsExpanded(false)}
     >
-      <button
-        className="md:hidden absolute top-4 left-4 text-[#4A3628] dark:text-[#FAF3DD]"
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <HiMenuAlt2 size={28} />
-      </button>
-
+      {/* Profile Section */}
       <div className="flex items-center w-full mb-5">
         <Image src={userImage} alt="Profile" width={48} height={48} className="rounded-full shrink-0" />
         <AnimatePresence>
@@ -80,10 +84,11 @@ export default function Sidebar() {
         </AnimatePresence>
       </div>
 
+      {/* Edit Profile */}
       <div
         onClick={() => router.push("/profile")}
         className="w-full flex items-center p-3 mb-5 rounded-lg transition duration-300 
-                  hover:bg-[#E2C799] dark:hover:bg-[#5A4532] text-[#4A3628] dark:text-[#FAF3DD] cursor-pointer"
+                  hover:bg-[#E2C799] dark:hover:bg-[#5A4532] cursor-pointer"
       >
         <FiUser size={28} className="shrink-0" />
         <AnimatePresence>
@@ -101,6 +106,7 @@ export default function Sidebar() {
         </AnimatePresence>
       </div>
 
+      {/* Navigation */}
       <nav className="w-full flex flex-col space-y-2">
         {sidebarItems.map(({ icon: Icon, label, path }) => (
           <div
@@ -131,10 +137,12 @@ export default function Sidebar() {
         ))}
       </nav>
 
+      {/* Footer Actions */}
       <div className="mt-auto w-full space-y-2">
+        {/* Theme Toggle */}
         <div
           className="w-full flex items-center p-3 rounded-lg transition duration-300 cursor-pointer
-                    hover:bg-[#E2C799] dark:hover:bg-[#5A4532] text-[#4A3628] dark:text-[#FAF3DD]"
+                    hover:bg-[#E2C799] dark:hover:bg-[#5A4532]"
           onClick={toggleTheme}
         >
           {theme === "dark" ? <FiSun size={28} /> : <FiMoon size={28} />}
@@ -153,9 +161,10 @@ export default function Sidebar() {
           </AnimatePresence>
         </div>
 
+        {/* Sign Out */}
         <div
           className="w-full flex items-center p-3 rounded-lg transition duration-300 cursor-pointer
-                    hover:bg-[#E2C799] dark:hover:bg-[#5A4532] text-[#4A3628] dark:text-[#FAF3DD]"
+                    hover:bg-[#E2C799] dark:hover:bg-[#5A4532]"
           onClick={handleSignOut}
         >
           <FiLogOut size={28} className="shrink-0" />

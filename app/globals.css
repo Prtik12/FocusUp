@@ -19,3 +19,11 @@ body {
 button, a {
   cursor: url('/CursorPointer.png') 5 5, pointer;
 }
+
+.sidebar * {
+  cursor: url('/CursorPointer.png') 5 5, pointer !important;
+}
+
+.custom-cursor {
+  cursor: url('/CursorPointer.png') 5 5, pointer !important;
+}
