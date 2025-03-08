@@ -36,9 +36,9 @@ export default function Sidebar() {
   }, [session?.user?.name, session?.user?.image]);
 
   // Ensure sidebar updates after profile change
-  useEffect(() => {
-    update();
-  }, [update]);
+  // useEffect(() => {
+  //   update();
+  // }, [update]);
 
   // Handle window resize
   useEffect(() => {
