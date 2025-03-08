@@ -7,45 +7,70 @@ import Sidebar from "@/components/Sidebar";
 
 export default function EditProfile() {
   const { data: session, update } = useSession();
-  const [name, setName] = useState(session?.user?.name ?? "");
-  const [image, setImage] = useState(session?.user?.image ?? "/avatar-placeholder.png");
+  const [name, setName] = useState("");
+  const [image, setImage] = useState("/avatar-placeholder.png");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  // Load session data
   useEffect(() => {
     if (session?.user) {
       setName(session.user.name || "");
       setImage(session.user.image || "/avatar-placeholder.png");
     }
-  }, [session]);
+  }, [JSON.stringify(session?.user)]); // ✅ Fix: Ensures stable dependencies  
 
+  // Handle image selection
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === "string") {
-          setImage(reader.result);
-        }
-      };
-      reader.readAsDataURL(file);
+      setSelectedFile(file);
+      setImage(URL.createObjectURL(file)); // Instant preview
     }
   };
 
+  // Save changes to the profile
   const handleSaveChanges = async () => {
+    setLoading(true);
+    setError(null);
+  
     try {
+      let imageUrl = image;
+  
+      // Upload image if a new file is selected
+      if (selectedFile) {
+        const formData = new FormData();
+        formData.append("file", selectedFile);
+  
+        const uploadResponse = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+  
+        if (!uploadResponse.ok) {
+          throw new Error("Failed to upload image");
+        }
+  
+        const uploadData = await uploadResponse.json();
+        imageUrl = uploadData.url;
+      }
+  
+      // Update profile
       const response = await fetch("/api/user/update-profile", {
-        method: "POST",
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, image }),
+        body: JSON.stringify({ name, image: imageUrl }),
       });
-
+  
       if (!response.ok) {
         throw new Error("Failed to update profile");
       }
-
+  
       const data = await response.json();
-
-      // Update session with new user data
-      await update({
+  
+      // ✅ Force update the session
+      const updatedSession = await update({
         ...session,
         user: {
           ...session?.user,
@@ -53,12 +78,16 @@ export default function EditProfile() {
           image: data.user.image,
         },
       });
-
-      console.log("Profile updated successfully");
+  
+      console.log("Updated session:", updatedSession);
     } catch (error) {
       console.error("Error updating profile:", error);
+      setError("Failed to update profile. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
+  
 
   return (
     <div className="flex min-h-screen">
@@ -83,12 +112,18 @@ export default function EditProfile() {
           className="p-2 rounded-md border border-[#4A3628] dark:border-[#FAF3DD] bg-transparent text-[#4A3628] dark:text-[#FAF3DD] w-64 text-center mb-4"
         />
 
+        {/* Error Message */}
+        {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+
         {/* Save Changes Button */}
         <button
           onClick={handleSaveChanges}
-          className="px-6 py-2 bg-[#F96F5D] text-white rounded-lg hover:bg-[#e85b4b] transition"
+          disabled={loading}
+          className={`px-6 py-2 rounded-lg transition ${
+            loading ? "bg-gray-400 cursor-not-allowed" : "bg-[#F96F5D] text-white hover:bg-[#e85b4b]"
+          }`}
         >
-          Save Changes
+          {loading ? "Saving..." : "Save Changes"}
         </button>
       </div>
     </div>

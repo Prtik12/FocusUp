@@ -1,28 +1,48 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import prisma from "@/lib/prisma";
+import prisma from "@/lib/prisma"; // Ensure prisma client is properly imported
 
-// Handle POST request for updating profile
-export async function POST(req: Request) {
+export async function PUT(req: Request) {
   try {
+    // 1️⃣ Authenticate the user
     const session = await getServerSession(authOptions);
-
-    if (!session || !session.user?.email) {
+    if (!session?.user?.email) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
+    // 2️⃣ Parse request body
     const { name, image } = await req.json();
 
-    // Update the user in the database
+    // 3️⃣ Validate input (at least one field should be provided)
+    if (!name?.trim() && !image) {
+      return NextResponse.json({ message: "Invalid input" }, { status: 400 });
+    }
+
+    // 4️⃣ Prepare update data (avoid updating undefined fields)
+    const updateData: { name?: string; image?: string } = {};
+    if (name?.trim()) updateData.name = name.trim();
+    if (image) updateData.image = image;
+
+    // 5️⃣ Update the user in the database
     const updatedUser = await prisma.user.update({
       where: { email: session.user.email },
-      data: { name, image },
+      data: updateData, // Only update the provided fields
     });
 
-    return NextResponse.json({ user: updatedUser }, { status: 200 });
+    // 6️⃣ Return updated user data
+    return NextResponse.json({
+      message: "Profile updated successfully",
+      user: {
+        id: updatedUser.id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        image: updatedUser.image,
+        updatedAt: updatedUser.updatedAt,
+      },
+    });
   } catch (error) {
-    console.error("Error updating profile:", error);
-    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+    console.error("Profile update error:", error);
+    return NextResponse.json({ message: "Failed to update profile" }, { status: 500 });
   }
 }

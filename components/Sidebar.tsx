@@ -24,7 +24,23 @@ export default function Sidebar() {
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [userName, setUserName] = useState("User");
+  const [userImage, setUserImage] = useState("/avatar-placeholder.png");
 
+  // Update name & image when session changes
+  useEffect(() => {
+    if (session?.user) {
+      setUserName(session.user.name || "User");
+      setUserImage(session.user.image || "/avatar-placeholder.png");
+    }
+  }, [session?.user?.name, session?.user?.image]);
+
+  // Ensure sidebar updates after profile change
+  useEffect(() => {
+    update();
+  }, [update]);
+
+  // Handle window resize
   useEffect(() => {
     if (typeof window !== "undefined") {
       setIsMobile(window.innerWidth < 768);
@@ -34,24 +50,14 @@ export default function Sidebar() {
     }
   }, []);
 
+  // Redirect to sign-in if session is null
   useEffect(() => {
     if (status !== "loading" && !session) {
       router.push("/signin");
     }
   }, [session, status, router]);
 
-  // Re-fetch session to get the latest user data after profile update
-  useEffect(() => {
-    update(); // Fetch new session data when sidebar mounts
-  }, []);
-
-  if (status === "loading") {
-    return <div className="h-screen w-20 bg-[#FBF2C0] dark:bg-[#4A3628] animate-pulse"></div>;
-  }
-
-  const userName = session?.user?.name ?? "User";
-  const userImage = session?.user?.image ?? "/avatar-placeholder.png";
-
+  // Sign out function
   const handleSignOut = async () => {
     await signOut({ redirect: true, callbackUrl: "/signin" });
   };
