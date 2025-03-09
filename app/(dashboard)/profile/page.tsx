@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import BottomBar from "@/components/BottomBar";
-import imageCompression from "browser-image-compression"; // ✅ Import compression
+import imageCompression from "browser-image-compression"; 
 
 export default function EditProfile() {
   const { data: session, update } = useSession();
@@ -71,7 +71,10 @@ export default function EditProfile() {
         if (!uploadResponse.ok) throw new Error("Failed to upload image");
 
         const uploadData = await uploadResponse.json();
-        imageUrl = uploadData.url;
+        if (!uploadData || !uploadData.url) {
+          throw new Error("Invalid upload response");
+        }
+        imageUrl = uploadData.url; // ✅ Ensure correct URL handling
       }
 
       // Update profile
@@ -86,14 +89,15 @@ export default function EditProfile() {
       const data = await response.json();
 
       // ✅ Force update session & UI state
-      await update({
-        ...session,
-        user: {
-          ...session?.user,
-          name: data.user.name,
-          image: data.user.image,
-        },
-      });
+// ✅ Force NextAuth to refresh the session properly
+const updated = await update();
+if (!updated) throw new Error("Session update failed");
+
+// Manually refetch session data
+router.refresh();
+
+
+      if (!updated) throw new Error("Session update failed");
 
       setName(data.user.name);
       setImage(data.user.image);
@@ -101,7 +105,7 @@ export default function EditProfile() {
       router.refresh();
     } catch (error) {
       console.error("Error updating profile:", error);
-      setError("Failed to update profile. Please try again.");
+      setError(error instanceof Error ? error.message : "Failed to update profile. Please try again.");
     } finally {
       setLoading(false);
     }
