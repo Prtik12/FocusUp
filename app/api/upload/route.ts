@@ -29,7 +29,7 @@ export async function POST(req: Request) {
       .upload(filePath, fileBuffer, { contentType: file.type });
 
     if (error) {
-      console.error("Upload error:", error.message);
+      console.error("Upload error:", data, error.message);
       return NextResponse.json({ message: "Failed to upload image", error: error.message }, { status: 500 });
     }
 

@@ -17,7 +17,7 @@ const sidebarItems = [
 ];
 
 export default function Sidebar() {
-  const { data: session, status, update } = useSession();
+  const { data: session, status } = useSession();
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
   const router = useRouter();
@@ -33,7 +33,7 @@ export default function Sidebar() {
       setUserName(session.user.name || "User");
       setUserImage(session.user.image || "/avatar-placeholder.png");
     }
-  }, [session?.user?.name, session?.user?.image]);
+  }, [session?.user]);
 
   // Ensure sidebar updates after profile change
   // useEffect(() => {
@@ -74,7 +74,14 @@ export default function Sidebar() {
     >
       {/* Profile Section */}
       <div className="flex items-center w-full mb-5">
-        <Image src={userImage} alt="Profile" width={48} height={48} className="rounded-full shrink-0" />
+      <Image
+  src={userImage}
+  alt="Profile"
+  width={48}
+  height={48}
+  className="rounded-full object-cover w-12 h-12"
+/>
+
         <AnimatePresence>
           {isExpanded && (
             <motion.span

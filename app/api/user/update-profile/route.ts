@@ -30,6 +30,8 @@ export async function PUT(req: Request) {
       data: updateData, // Only update the provided fields
     });
 
+    console.log("Updated User:", updatedUser);
+
     // 6️⃣ Return updated user data
     return NextResponse.json({
       message: "Profile updated successfully",
