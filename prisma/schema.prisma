@@ -21,6 +21,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   Authenticators Authenticator[]
+  studyPlans    StudyPlan[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -83,5 +84,28 @@ model Authenticator {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, credentialID])  // ✅ Ensures unique authentication per user
+  @@unique([userId, credentialID])  
+}
+
+model StudyPlan {
+  id        String    @id @default(cuid())
+  userId    String
+  subject   String
+  examDate  DateTime
+  createdAt DateTime  @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks     StudyTask[]
+
+  @@index([userId]) 
+}
+
+model StudyTask {
+  id          String   @id @default(cuid())
+  studyPlanId String
+  title       String
+  dueDate     DateTime
+  completed   Boolean  @default(false)
+
+  studyPlan   StudyPlan @relation(fields: [studyPlanId], references: [id], onDelete: Cascade)
 }
