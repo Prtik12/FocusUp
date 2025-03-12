@@ -93,6 +93,7 @@ model StudyPlan {
   subject   String
   examDate  DateTime
   createdAt DateTime  @default(now())
+  content   String? 
 
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   tasks     StudyTask[]
