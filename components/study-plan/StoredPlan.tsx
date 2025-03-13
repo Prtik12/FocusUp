@@ -19,7 +19,7 @@ export default function StoredPlan({ plan, onDelete, deleteInProgress }: StoredP
 
   return (
     <motion.div
-      className="bg-white dark:bg-[#2A1F1A] rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden"
+      className="bg-[#FAF3DD] dark:bg-[#2A1F1A] rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden"
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
       layout

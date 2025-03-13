@@ -74,7 +74,7 @@ export default function StudyPlanForm({ userId, setStudyPlans, onPlanCreated }: 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white dark:bg-[#2A1F1A] p-8 rounded-xl shadow-sm">
+    <form onSubmit={handleSubmit} className=" bg-[#FAF3DD] dark:bg-[#2A1F1A] p-8 rounded-xl shadow-sm">
       <div className="space-y-6">
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -121,7 +121,7 @@ export default function StudyPlanForm({ userId, setStudyPlans, onPlanCreated }: 
               : 'bg-[#4A3628] dark:bg-[#FAF3DD] text-[#FAF3DD] dark:text-[#4A3628] hover:bg-[#3a2b1f] dark:hover:bg-[#e3dcc9] hover:shadow-md'
           }`}
         >
-          {loading ? 'Generating...' : 'Generate Study Plan'}
+          {loading ? 'Generating...' : 'Generate Plan'}
         </button>
       </div>
 

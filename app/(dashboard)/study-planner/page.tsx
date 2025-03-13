@@ -131,7 +131,7 @@ export default function StudyPlanPage() {
             className="text-center mb-8"
           >
             <h1 className="text-3xl text-[#4A3628] dark:text-[#FAF3DD] mb-2">
-              Study Plan Generator
+              Study Planner
             </h1>
             <p className="text-base text-gray-600 dark:text-gray-300 font-pangolin">
               Create and manage your personalized study plans
