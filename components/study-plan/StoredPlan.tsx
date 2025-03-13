@@ -1,71 +1,77 @@
+import { useState } from 'react';
+import { StudyPlan } from '@/types/studyPlan';
+import { motion } from 'framer-motion';
+import { format } from 'date-fns';
+import { Trash2 } from 'lucide-react';
+
 interface StoredPlanProps {
-    plan: {
-      id: string;
-      content: string;
-      subject: string;
-      examDate: string;
-      createdAt: string;
-    };
-    onDelete: (id: string) => void;
-    deleteInProgress?: boolean;
-  }
-  
-  export default function StoredPlan({ plan, onDelete, deleteInProgress = false }: StoredPlanProps) {
-    const formatDate = (dateString: string) => {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-    };
-  
-    const handleDelete = async () => {
-      try {
-        await onDelete(plan.id);
-      } catch (error) {
-        console.error('Error deleting study plan:', error);
-        // You can add toast notification here for error feedback
-      }
-    };
-  
-    return (
-      <div className="bg-white dark:bg-[#4a3628] border border-[#4A3628] dark:border-[#FAF3DD] p-6 rounded-lg shadow-md">
-        <div className="flex justify-between items-start mb-4">
-          <div>
-            <h3 className="text-xl font-bold text-[#4A3628] dark:text-[#FAF3DD] mb-1">
+  plan: StudyPlan;
+  onDelete: (id: string) => void;
+  deleteInProgress?: boolean;
+}
+
+export default function StoredPlan({ plan, onDelete, deleteInProgress }: StoredPlanProps) {
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleDelete = () => {
+    onDelete(plan.id);
+  };
+
+  return (
+    <motion.div
+      className="bg-white dark:bg-[#2A1F1A] rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden"
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+      layout
+    >
+      <div className="p-6 flex flex-col h-[600px]">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex-1">
+            <h3 className="text-lg font-pangolin text-[#4A3628] dark:text-[#FAF3DD] truncate">
               {plan.subject}
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-300">
-              Target Date: {formatDate(plan.examDate)}
-            </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Created: {formatDate(plan.createdAt)}
+            <p className="text-base text-gray-600 dark:text-gray-300 font-pangolin">
+              Exam Date: {format(new Date(plan.examDate), 'MMM dd, yyyy')}
             </p>
           </div>
           <button
             onClick={handleDelete}
             disabled={deleteInProgress}
-            className={`text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors ${
-              deleteInProgress ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
-            aria-label="Delete study plan"
+            className={`ml-4 p-2 rounded-full transition-all duration-200 ${
+              isHovered ? 'opacity-100' : 'opacity-0'
+            } hover:bg-red-100 dark:hover:bg-red-900/30 text-red-500`}
           >
-            {deleteInProgress ? (
-              <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-red-500"></div>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-            )}
+            <Trash2 className="w-5 h-5" />
           </button>
         </div>
-  
-        <div className="prose prose-sm dark:prose-invert max-w-none mt-4">
-          <div className="whitespace-pre-line text-[#4A3628] dark:text-[#FAF3DD] leading-relaxed">
-            {plan.content}
+
+        <div className="flex-1 overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-[#4A3628] dark:scrollbar-thumb-[#FAF3DD] scrollbar-track-transparent">
+          <div className="prose dark:prose-invert max-w-none">
+            <div 
+              className="text-[#4A3628] dark:text-[#FAF3DD] leading-relaxed font-pangolin"
+              dangerouslySetInnerHTML={{ 
+                __html: plan.content
+                  .replace(/\n/g, '<br />')
+                  .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                  .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                  .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+                  .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+                  .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+                  .replace(/^\- (.*$)/gm, '<li>$1</li>')
+                  .replace(/^[0-9]+\. (.*$)/gm, '<li>$1</li>')
+                  .replace(/(<li>.*<\/li>)/g, '<ul>$1</ul>')
+                  .replace(/(<li>.*<\/li>)/g, '<ol>$1</ol>')
+                  .replace(/`(.*?)`/g, '<code>$1</code>')
+                  .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+                  .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>')
+                  .replace(/!\[(.*?)\]\((.*?)\)/g, '<img src="$2" alt="$1" />')
+                  .replace(/\n\n/g, '<br /><br />')
+              }} 
+            />
           </div>
         </div>
       </div>
-    );
-  }
+    </motion.div>
+  );
+}
   

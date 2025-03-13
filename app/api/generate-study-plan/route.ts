@@ -129,11 +129,24 @@ export async function POST(req: NextRequest) {
 // DELETE handler: Remove a study plan by ID
 export async function DELETE(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const planId = searchParams.get('id');
+    const body = await req.json();
+    const { planId, userId } = body;
 
-    if (!planId) {
-      return NextResponse.json({ error: 'Missing plan ID' }, { status: 400 });
+    if (!planId || !userId) {
+      return NextResponse.json({ error: 'Missing planId or userId' }, { status: 400 });
+    }
+
+    // Check if the study plan exists and belongs to the user
+    const studyPlan = await prisma.studyPlan.findUnique({
+      where: { id: planId },
+    });
+
+    if (!studyPlan) {
+      return NextResponse.json({ error: 'Study plan not found' }, { status: 404 });
+    }
+
+    if (studyPlan.userId !== userId) {
+      return NextResponse.json({ error: 'Unauthorized: Cannot delete this plan' }, { status: 403 });
     }
 
     await prisma.studyPlan.delete({ where: { id: planId } });
@@ -145,3 +158,4 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to delete study plan' }, { status: 500 });
   }
 }
+

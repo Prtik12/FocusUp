@@ -2,11 +2,14 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { Pangolin } from "next/font/google";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import BottomBar from "@/components/BottomBar";
 import imageCompression from "browser-image-compression"; 
+
+const pangolin = Pangolin({ weight: "400", subsets: ["latin"], display: "swap" });
 
 export default function EditProfile() {
   const { data: session, update } = useSession();
@@ -120,7 +123,7 @@ router.refresh();
   }, []);
 
   return (
-    <div className="flex min-h-screen">
+    <div className={`flex min-h-screen ${pangolin.className}`}>
       {!isMobile && <Sidebar />}
       {isMobile && <BottomBar />}
       <div className="flex flex-col items-center justify-center flex-1 bg-[#FBF2C0] dark:bg-[#4A3628] p-6">

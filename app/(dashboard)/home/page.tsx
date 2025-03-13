@@ -5,6 +5,9 @@ import BottomBar from "@/components/BottomBar";
 import Sidebar from "@/components/Sidebar";
 import { useSession } from "next-auth/react";
 import React from "react";
+import { Pangolin } from "next/font/google";
+
+const pangolin = Pangolin({ weight: "400", subsets: ["latin"], display: "swap" });
 
 export default function Home() {
   const { data: session } = useSession();
@@ -20,7 +23,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className={`h-max relative ${isMobile ? "px-0 pb-16" : "ml-20 px-0"}`}>
+    <div className={`h-max relative ${pangolin.className} ${isMobile ? "px-0 pb-16" : "ml-20 px-0"}`}>
       {!isMobile && <Sidebar />}
       {isMobile && <BottomBar />}
 

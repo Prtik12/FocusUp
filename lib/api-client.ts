@@ -31,9 +31,14 @@ export const apiClient = {
     return response.json();
   },
 
-  async deleteStudyPlan(planId: string) {
-    const response = await fetch(`${API_BASE_URL}/generate-study-plan/${planId}`, {
+  async deleteStudyPlan(planId: string, userId: string) {
+    console.log("Sending DELETE request for plan ID:", planId);
+    const response = await fetch(`${API_BASE_URL}/generate-study-plan`, {
       method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ planId, userId }),
     });
 
     if (!response.ok) {

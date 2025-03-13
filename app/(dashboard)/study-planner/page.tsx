@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { apiClient } from '@/lib/api-client';
+import { Pangolin } from "next/font/google";
 import { useSession } from 'next-auth/react';
 import StudyPlanForm from '@/components/Forms/StudyPlan/StudyPlanForm';
 import StoredPlan from '@/components/study-plan/StoredPlan';
@@ -10,14 +11,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { StudyPlan } from '@/types/studyPlan';
 import { Toaster, toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import BottomBar from '@/components/BottomBar';
+import Sidebar from '@/components/Sidebar';
 
 const ITEMS_PER_PAGE = 6;
+
+const pangolin = Pangolin({ weight: "400", subsets: ["latin"], display: "swap" });
 
 export default function StudyPlanPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const userId = session?.user?.id;
-
+  const [isMobile, setIsMobile] = useState(false);
   const [studyPlans, setStudyPlans] = useState<StudyPlan[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
@@ -25,18 +30,25 @@ export default function StudyPlanPage() {
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [isFetching, setIsFetching] = useState(false);
 
-  // Memoized fetch function to prevent unnecessary re-renders
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize(); // Check on mount
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Fetch study plans from API
   const fetchPlans = useCallback(async () => {
     if (!userId) return;
-
+    
     setIsFetching(true);
     setError(null);
-    
+
     try {
       const data = await apiClient.getStudyPlans(userId, page, ITEMS_PER_PAGE);
       
       if (Array.isArray(data?.plans)) {
-        setStudyPlans(data.plans);
+        setStudyPlans(data.plans || []);
         setTotalPages(Math.ceil((data.total || 0) / ITEMS_PER_PAGE));
       } else {
         throw new Error("Invalid response format");
@@ -45,54 +57,49 @@ export default function StudyPlanPage() {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch study plans';
       console.error("Error fetching study plans:", errorMessage);
       setError(errorMessage);
-      toast.error('Failed to load study plans', {
-        description: errorMessage
-      });
+      toast.error('Failed to load study plans', { description: errorMessage });
     } finally {
       setIsFetching(false);
     }
   }, [userId, page]);
 
-  // Effect for session handling and redirection
+  // Redirect to sign-in if not logged in
   useEffect(() => {
     if (status === 'loading') return;
-    
-    if (!session) {
-      router.push('/signin');
-      return;
-    }
+    if (!session) router.push('/signin');
   }, [session, status, router]);
 
-  // Effect for fetching study plans
+  // Fetch study plans when user logs in or page changes
   useEffect(() => {
-    if (!isFetching) {
-      fetchPlans();
-    }
+    fetchPlans();
   }, [fetchPlans, page]);
 
+  // Handle study plan deletion
   const handleDelete = async (planId: string) => {
-    if (isDeleting) return; // Prevent multiple delete requests
+    if (isDeleting || !userId) return;
 
-    const shouldDelete = window.confirm('Are you sure you want to delete this study plan?');
+    // Validate CUID format
+    if (!/^c[a-z0-9]+$/i.test(planId)) {
+      toast.error("Invalid study plan ID.");
+      return;
+    }
+
+    const shouldDelete = window.confirm("Are you sure you want to delete this study plan?");
     if (!shouldDelete) return;
 
     setIsDeleting(planId);
-    
+
     try {
-      await apiClient.deleteStudyPlan(planId);
+      await apiClient.deleteStudyPlan(planId, userId);
       setStudyPlans((prev) => prev.filter((plan) => plan.id !== planId));
-      toast.success('Study plan deleted successfully');
-      
-      // Refetch if we're on the last page and it's now empty
+      toast.success("Study plan deleted successfully");
+
       if (studyPlans.length === 1 && page > 1) {
-        setPage(prev => prev - 1);
+        setPage((prev) => prev - 1);
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete study plan';
-      console.error("Error deleting study plan:", errorMessage);
-      toast.error('Failed to delete study plan', {
-        description: errorMessage
-      });
+      console.error("Error deleting study plan:", err);
+      toast.error("Failed to delete study plan", { description: String(err) });
     } finally {
       setIsDeleting(null);
     }
@@ -106,104 +113,122 @@ export default function StudyPlanPage() {
     );
   }
 
-  if (!session) {
-    return null; // Router will handle redirection
-  }
+  if (!session) return null; // Redirect handled by router
 
   return (
-    <div className="container mx-auto p-6 bg-[#FBF2C0] dark:bg-[#4a3628] min-h-screen">
-      <Toaster position="bottom-right" richColors closeButton />
-      
-      <motion.h1 
-        className="text-3xl font-bold mb-6 text-[#4A3628] dark:text-[#FAF3DD] text-center font-pangolin"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        Study Plan Generator
-      </motion.h1>
-      
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-      >
-        <StudyPlanForm 
-          userId={userId ?? ''} 
-          setStudyPlans={setStudyPlans}
-          onPlanCreated={() => {
-            setPage(1);
-            fetchPlans();
-          }}
-        />
-      </motion.div>
-      
-      {isFetching && (
-        <div className="text-center py-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#4A3628] dark:border-[#FAF3DD] mx-auto"></div>
-        </div>
-      )}
-      
-      {error && !isFetching && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center text-red-500 py-4"
-        >
-          {error}
-        </motion.div>
-      )}
+    <div className={`h-max relative ${pangolin.className} ${isMobile ? "px-0 pb-16" : "ml-20 px-0"}`}>
+      {!isMobile && <Sidebar />}
+      {isMobile && <BottomBar />}
 
-      <AnimatePresence mode="popLayout">
-        {studyPlans.length > 0 ? (
+      <div className="min-h-screen bg-[#FBF2C0] dark:bg-[#4a3628]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <Toaster position="bottom-right" richColors closeButton />
+
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-center mb-8"
           >
-            {studyPlans.map((plan, index) => (
-              <motion.div
-                key={plan.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, delay: index * 0.1 }}
-                layout
-              >
-                <StoredPlan 
-                  plan={plan} 
-                  onDelete={handleDelete}
-                  deleteInProgress={isDeleting === plan.id}
-                />
-              </motion.div>
-            ))}
+            <h1 className="text-3xl text-[#4A3628] dark:text-[#FAF3DD] mb-2">
+              Study Plan Generator
+            </h1>
+            <p className="text-base text-gray-600 dark:text-gray-300 font-pangolin">
+              Create and manage your personalized study plans
+            </p>
           </motion.div>
-        ) : !isFetching && (
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center text-lg text-[#4A3628] dark:text-[#FAF3DD] mt-4"
-          >
-            No study plans found. Create one to get started!
-          </motion.p>
-        )}
-      </AnimatePresence>
 
-      {studyPlans.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-        >
-          <PaginationNav 
-            page={page} 
-            setPage={setPage} 
-            pageCount={totalPages}
-            isDisabled={isFetching}
-          />
-        </motion.div>
-      )}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="max-w-2xl mx-auto mb-12"
+          >
+            <StudyPlanForm 
+              userId={userId ?? ''} 
+              setStudyPlans={setStudyPlans}
+              onPlanCreated={() => {
+                setPage(1);
+                fetchPlans();
+              }}
+            />
+          </motion.div>
+
+          {isFetching && (
+            <div className="text-center py-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#4A3628] dark:border-[#FAF3DD] mx-auto"></div>
+            </div>
+          )}
+
+          {error && !isFetching && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center text-red-500 py-4"
+            >
+              {error}
+            </motion.div>
+          )}
+
+          <AnimatePresence mode="popLayout">
+            {Array.isArray(studyPlans) && studyPlans.length > 0 ? (
+              <motion.div
+                className="space-y-8"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                <motion.div
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                >
+                  {studyPlans.map((plan, index) => (
+                    <motion.div
+                      key={plan.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.3, delay: index * 0.1 }}
+                      layout
+                    >
+                      <StoredPlan 
+                        plan={plan} 
+                        onDelete={handleDelete}
+                        deleteInProgress={isDeleting === plan.id}
+                      />
+                    </motion.div>
+                  ))}
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 0.4 }}
+                >
+                  <PaginationNav 
+                    page={page} 
+                    setPage={setPage} 
+                    pageCount={totalPages}
+                    isDisabled={isFetching}
+                  />
+                </motion.div>
+              </motion.div>
+            ) : !isFetching && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center py-12"
+              >
+                <p className="text-xl text-[#4A3628] dark:text-[#FAF3DD] mb-2 font-pangolin">
+                  No study plans found
+                </p>
+                <p className="text-base text-gray-600 dark:text-gray-300 font-pangolin">
+                  Create your first study plan to get started
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
     </div>
   );
 }

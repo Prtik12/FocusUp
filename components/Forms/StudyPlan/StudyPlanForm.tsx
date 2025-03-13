@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { apiClient } from '@/lib/api-client';
 import { StudyPlan } from '@/types/studyPlan';
 import { toast } from 'sonner';
+import { Calendar, BookOpen } from 'lucide-react';
 
 interface StudyPlanFormProps {
   userId: string;
@@ -57,8 +58,6 @@ export default function StudyPlanForm({ userId, setStudyPlans, onPlanCreated }: 
 
     try {
       const newPlan = await apiClient.createStudyPlan(userId, subject, examDate);
-      console.log("Newly Created Study Plan:", newPlan);
-      
       setStudyPlans((prev) => [newPlan, ...prev]);
       setSubject('');
       setExamDate('');
@@ -75,69 +74,76 @@ export default function StudyPlanForm({ userId, setStudyPlans, onPlanCreated }: 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 bg-white dark:bg-[#4a3628] p-6 rounded-lg shadow-md border border-[#4A3628] dark:border-[#FAF3DD]">
-      <div className="space-y-2">
-        <label htmlFor="subject" className="block text-sm font-medium text-[#4A3628] dark:text-[#FAF3DD]">
-          Subject or Topic
-        </label>
-        <input
-          id="subject"
-          type="text"
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-          placeholder="e.g., Mathematics, History, Programming"
-          className="w-full p-2 border rounded-md bg-[#FAF3DD] dark:bg-[#4a3628] text-[#4A3628] dark:text-[#FAF3DD] placeholder-gray-400"
-          required
-        />
-        <p className="text-xs text-gray-500 dark:text-gray-400">
-          Enter the main subject or topic you want to study
-        </p>
-      </div>
-
-      <div className="space-y-2">
-        <label htmlFor="examDate" className="block text-sm font-medium text-[#4A3628] dark:text-[#FAF3DD]">
-          Target Completion Date
-        </label>
-        <input
-          id="examDate"
-          type="date"
-          value={examDate}
-          onChange={(e) => setExamDate(e.target.value)}
-          className="w-full p-2 border rounded-md bg-[#FAF3DD] dark:bg-[#4a3628] text-[#4A3628] dark:text-[#FAF3DD]"
-          min={new Date().toISOString().split('T')[0]}
-          required
-        />
-        <p className="text-xs text-gray-500 dark:text-gray-400">
-          Select your target date for completing this subject
-        </p>
-      </div>
-
-      {error && (
-        <div className="text-red-500 text-sm">
-          {error}
+    <form onSubmit={handleSubmit} className="bg-white dark:bg-[#2A1F1A] p-8 rounded-xl shadow-sm">
+      <div className="space-y-6">
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <BookOpen className="h-5 w-5 text-gray-400" />
+          </div>
+          <input
+            id="subject"
+            type="text"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            placeholder="What do you want to study?"
+            className="w-full pl-10 pr-4 py-3 border-0 border-b-2 border-gray-200 dark:border-gray-700 focus:border-[#4A3628] dark:focus:border-[#FAF3DD] bg-transparent text-[#4A3628] dark:text-[#FAF3DD] placeholder-gray-400 focus:ring-0 transition-colors"
+            required
+          />
         </div>
-      )}
 
-      <button
-        type="submit"
-        disabled={loading}
-        className={`w-full py-2 px-4 rounded-md transition-colors ${
-          loading
-            ? 'bg-gray-400 cursor-not-allowed'
-            : 'bg-[#4A3628] dark:bg-[#FAF3DD] text-[#FAF3DD] dark:text-[#4A3628] hover:bg-[#3a2b1f] dark:hover:bg-[#e3dcc9]'
-        }`}
-      >
-        {loading ? 'Generating Study Plan...' : 'Generate Study Plan'}
-      </button>
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Calendar className="h-5 w-5 text-gray-400" />
+          </div>
+          <input
+            id="examDate"
+            type="date"
+            value={examDate}
+            onChange={(e) => setExamDate(e.target.value)}
+            className="w-full pl-10 pr-4 py-3 border-0 border-b-2 border-gray-200 dark:border-gray-700 focus:border-[#4A3628] dark:focus:border-[#FAF3DD] bg-transparent text-[#4A3628] dark:text-[#FAF3DD] focus:ring-0 transition-colors"
+            min={new Date().toISOString().split('T')[0]}
+            required
+          />
+        </div>
 
-      <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
-        <p>Your study plan will include:</p>
-        <ul className="list-disc list-inside mt-2 space-y-1">
-          <li>Detailed weekly breakdown</li>
-          <li>Daily study goals</li>
-          <li>Recommended resources</li>
-          <li>Progress tracking milestones</li>
-        </ul>
+        {error && (
+          <div className="text-red-500 text-sm">
+            {error}
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={loading}
+          className={`w-full py-3 px-4 rounded-lg transition-all ${
+            loading
+              ? 'bg-gray-400 cursor-not-allowed'
+              : 'bg-[#4A3628] dark:bg-[#FAF3DD] text-[#FAF3DD] dark:text-[#4A3628] hover:bg-[#3a2b1f] dark:hover:bg-[#e3dcc9] hover:shadow-md'
+          }`}
+        >
+          {loading ? 'Generating...' : 'Generate Study Plan'}
+        </button>
+      </div>
+
+      <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
+        <div className="grid grid-cols-2 gap-4 text-sm text-gray-500 dark:text-gray-400">
+          <div className="flex items-center space-x-2">
+            <div className="w-2 h-2 rounded-full bg-[#4A3628] dark:bg-[#FAF3DD]"></div>
+            <span>Weekly breakdown</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-2 h-2 rounded-full bg-[#4A3628] dark:bg-[#FAF3DD]"></div>
+            <span>Daily goals</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-2 h-2 rounded-full bg-[#4A3628] dark:bg-[#FAF3DD]"></div>
+            <span>Study resources</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-2 h-2 rounded-full bg-[#4A3628] dark:bg-[#FAF3DD]"></div>
+            <span>Progress tracking</span>
+          </div>
+        </div>
       </div>
     </form>
   );

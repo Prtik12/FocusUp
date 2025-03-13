@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Pangolin } from "next/font/google";
 import { AuthProvider } from "@/providers/NextAuthProviders";
 import { ThemeProvider } from "@/providers/ThemeProviders";
 import "./globals.css";
@@ -14,6 +14,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const pangolin = Pangolin({
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-pangolin",
+});
+
 export const metadata: Metadata = {
   title: "FocusUp",
   description: "A productivity app to help you focus on your tasks.",
@@ -26,10 +33,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ThemeProvider>
-          <AuthProvider>{children}</AuthProvider>
-        </ThemeProvider>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${pangolin.variable} font-pangolin`}>
+        <AuthProvider>
+          <ThemeProvider>{children}</ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );
