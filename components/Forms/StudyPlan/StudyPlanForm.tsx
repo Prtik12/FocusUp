@@ -100,7 +100,7 @@ export default function StudyPlanForm({ userId, setStudyPlans, onPlanCreated }: 
             type="date"
             value={examDate}
             onChange={(e) => setExamDate(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border-0 border-b-2 border-gray-200 dark:border-gray-700 focus:border-[#4A3628] dark:focus:border-[#FAF3DD] bg-transparent text-[#4A3628] dark:text-[#FAF3DD] focus:ring-0 transition-colors"
+            className="w-full pl-10 pr-4 py-3 border-0 border-b-2 border-gray-200 dark:border-gray-700 focus:border-[#4A3628] dark:focus:border-[#FAF3DD] bg-transparent text-[#4A3628] dark:text-[#FAF3DD] focus:ring-0 transition-colors custom-cursor"
             min={new Date().toISOString().split('T')[0]}
             required
           />

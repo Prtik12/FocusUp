@@ -101,7 +101,7 @@ export default function Sidebar() {
       <div
         onClick={() => router.push("/profile")}
         className="w-full flex items-center p-3 mb-5 rounded-lg transition duration-300 
-                  hover:bg-[#E2C799] dark:hover:bg-[#5A4532] cursor-pointer"
+                  hover:bg-[#E2C799] dark:hover:bg-[#5A4532] custom-cursor"
       >
         <FiUser size={28} className="shrink-0" />
         <AnimatePresence>
@@ -125,7 +125,7 @@ export default function Sidebar() {
           <div
             key={path}
             onClick={() => router.push(path)}
-            className={`flex items-center p-3 rounded-lg transition duration-300 cursor-pointer
+            className={`flex items-center p-3 rounded-lg transition duration-300 custom-cursor 
                        ${
                          pathname === path
                            ? "bg-[#F96F5D] text-white"
