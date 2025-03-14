@@ -22,6 +22,7 @@ model User {
   sessions      Session[]
   Authenticators Authenticator[]
   studyPlans    StudyPlan[]
+  timerSession  TimerSession[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -109,4 +110,17 @@ model StudyTask {
   completed   Boolean  @default(false)
 
   studyPlan   StudyPlan @relation(fields: [studyPlanId], references: [id], onDelete: Cascade)
+}
+
+model TimerSession {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  focusTime  Int      // Total focus time in seconds
+  restTime   Int      // Total rest time in seconds
+  timeLeft   Int      // Remaining time in seconds
+  isRunning  Boolean  @default(false)
+  isFocusMode Boolean @default(true)
+  startTime  DateTime? // Tracks when the timer was last started
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
