@@ -86,18 +86,18 @@ export default function LandingPage() {
         </motion.div>
       </div>
 
-      {/* Footer */}
-      <div className="h-16 w-full dark:bg-[#FBF2C0] bg-[#4a3628] dark:text-[#4A3628] text-[#FAF3DD] flex items-center justify-center relative px-4 sm:px-6">
-        <p className="text-sm text-center">© 2025 FocusUp. All rights reserved.</p>
-        <div className="absolute right-4 sm:right-6 flex gap-4">
-          <Link href="https://discord.com" target="_blank" className="hover:scale-110 transition-transform">
-            <FaDiscord className="dark:text-[#4A3628] text-[#FAF3DD]" size={24} />
-          </Link>
-          <Link href="https://twitter.com" target="_blank" className="hover:scale-110 transition-transform">
-            <FaTwitter className="dark:text-[#4A3628] text-[#FAF3DD]" size={24} />
-          </Link>
-        </div>
-      </div>
+{/* Footer */}
+<div className="h-16 w-full dark:bg-[#FBF2C0] bg-[#4a3628] dark:text-[#4A3628] text-[#FAF3DD] flex flex-col sm:flex-row items-center justify-center sm:justify-between px-3 sm:px-6 text-xs sm:text-sm">
+  <p className="text-center">© 2025 FocusUp. All rights reserved.</p>
+  <div className="flex gap-3 sm:gap-4 mt-1 sm:mt-0">
+    <Link href="https://discord.com" target="_blank" className="hover:scale-110 transition-transform">
+      <FaDiscord className="dark:text-[#4A3628] text-[#FAF3DD] w-5 h-5 sm:w-6 sm:h-6" />
+    </Link>
+    <Link href="https://twitter.com" target="_blank" className="hover:scale-110 transition-transform">
+      <FaTwitter className="dark:text-[#4A3628] text-[#FAF3DD] w-5 h-5 sm:w-6 sm:h-6" />
+    </Link>
+  </div>
+</div>
     </main>
   );
 }
