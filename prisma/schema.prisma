@@ -23,6 +23,7 @@ model User {
   Authenticators Authenticator[]
   studyPlans    StudyPlan[]
   timerSession  TimerSession[]
+  notes         Note[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -123,4 +124,14 @@ model TimerSession {
   startTime  DateTime? // Tracks when the timer was last started
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+
+model Note {
+  id        String   @id @default(uuid())
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

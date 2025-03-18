@@ -7,33 +7,38 @@ const GROQ_API_KEY = process.env.GROQ_API_KEY;
 // Cache duration in seconds
 const CACHE_DURATION = 60;
 
-// Generate study plan prompt
+// Generate study plan prompt ensuring sequential daily study plan
 function generatePrompt(subject: string, examDate: string) {
-  return `As an expert educator, create a comprehensive study plan for ${subject}. The plan must be completed by ${examDate}.
+  const currentDate = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
+
+  return `As an expert educator, create a **comprehensive daily study plan** for ${subject} starting from **${currentDate}** and ending on **${examDate}**.
 
 DO NOT RETURN GENERIC TEMPLATES OR PLACEHOLDERS. EVERY SECTION MUST CONTAIN SPECIFIC CONTENT FOR ${subject.toUpperCase()}.
 
-📋 OVERVIEW
+📋 **OVERVIEW**
 ${subject} is [Write 2-3 specific sentences about what this subject is].
 This subject is important because [Write 2-3 specific sentences about real-world applications].
-By ${examDate}, you will be able to [List 3-4 specific, measurable skills].
+By **${examDate}**, you will be able to [List 3-4 specific, measurable skills].
 
-📆 DETAILED WEEKLY SCHEDULE
-[Provide detailed day-by-day study schedule]
+📆 **DETAILED DAILY SCHEDULE (From ${currentDate} to ${examDate})**
+- Provide a **specific study plan for each day** with detailed topics, exercises, and practice materials.
+- The difficulty should gradually increase as the exam approaches.
+- Include **revision days** and **mock tests** in the final week.
 
-📚 REQUIRED RESOURCES
-[List specific books, courses, and practice materials]
+📚 **REQUIRED RESOURCES**
+[List specific books, courses, and practice materials relevant to ${subject}.]
 
-📊 WEEKLY GOALS AND MILESTONES
-[List measurable objectives and success indicators]
+📊 **WEEKLY GOALS AND MILESTONES**
+[List measurable objectives and key outcomes to track progress.]
 
-💡 PRACTICAL STUDY TIPS FOR ${subject.toUpperCase()}
-[Provide tailored strategies for studying this subject]
+💡 **PRACTICAL STUDY TIPS FOR ${subject.toUpperCase()}**
+[Provide subject-specific learning strategies.]
 
-🚀 Progress Tracking Method:
-[Specify how the user should track progress]
+🚀 **PROGRESS TRACKING METHOD**
+[Suggest ways for the user to track their progress effectively.]
 `;
 }
+
 
 // GET handler: Fetch study plans with pagination
 export async function GET(req: NextRequest) {
