@@ -11,5 +11,12 @@ jobs:
 
     steps:
       - name: Call Notes Cleanup API
+        env:
+          CLEANUP_URL: ${{ secrets.NOTES_CLEANUP_URL }}
         run: |
-          curl -X GET "${{ secrets.NOTES_CLEANUP_URL }}"
+          if [ -z "$CLEANUP_URL" ]; then
+            echo "❌ ERROR: NOTES_CLEANUP_URL is not set!"
+            exit 1
+          fi
+          echo "✅ Triggering cleanup at: $CLEANUP_URL"
+          curl -X GET "$CLEANUP_URL"
