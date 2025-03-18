@@ -128,8 +128,9 @@ model TimerSession {
 
 
 model Note {
-  id        String   @id @default(uuid())
+  id        String   @id @default(cuid())  
   userId    String
+  title     String   @default("Untitled") // Set a default value
   content   String
   createdAt DateTime @default(now())
 

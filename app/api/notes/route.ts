@@ -25,24 +25,24 @@ export async function GET(req: NextRequest) {
 
 // POST a new note
 export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json();
-    const { userId, content } = body;
-
-    if (!userId || !content) {
-      return NextResponse.json({ error: "Missing userId or content" }, { status: 400 });
+    try {
+      const body = await req.json();
+      const { userId, title, content } = body;
+  
+      if (!userId || !title || !content) {
+        return NextResponse.json({ error: "Missing userId, title, or content" }, { status: 400 });
+      }
+  
+      const newNote = await prisma.note.create({
+        data: { userId, title, content },
+      });
+  
+      return NextResponse.json(newNote, { status: 201 });
+    } catch (error) {
+      console.error("Error creating note:", error);
+      return NextResponse.json({ error: "Failed to create note" }, { status: 500 });
     }
-
-    const newNote = await prisma.note.create({
-      data: { userId, content },
-    });
-
-    return NextResponse.json(newNote, { status: 201 });
-  } catch (error) {
-    console.error("Error creating note:", error);
-    return NextResponse.json({ error: "Failed to create note" }, { status: 500 });
-  }
-}
+  }  
 
 // DELETE a note
 export async function DELETE(req: NextRequest) {
