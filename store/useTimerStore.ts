@@ -16,6 +16,14 @@ interface TimerState {
   setHasHydrated: (state: boolean) => void;
 }
 
+// Helper function to calculate time left based on last timestamp
+const calculateTimeLeft = (lastTimestamp: number | null, prevTimeLeft: number) => {
+  if (!lastTimestamp) return prevTimeLeft;
+  const now = Date.now();
+  const elapsed = Math.floor((now - lastTimestamp) / 1000);
+  return Math.max(prevTimeLeft - elapsed, 0);
+};
+
 export const useTimerStore = create<TimerState>()(
   persist(
     (set, get) => {
@@ -28,16 +36,14 @@ export const useTimerStore = create<TimerState>()(
 
         timerInterval = setInterval(() => {
           set((state) => {
-            const now = Date.now();
-            const elapsed = Math.floor((now - (state.lastTimestamp ?? now)) / 1000);
-            const newTimeLeft = state.timeLeft - elapsed;
+            const newTimeLeft = calculateTimeLeft(state.lastTimestamp, state.timeLeft);
 
             if (newTimeLeft <= 0) {
               clearInterval(timerInterval as NodeJS.Timeout);
               return { timeLeft: 0, isRunning: false, lastTimestamp: null };
             }
 
-            return { timeLeft: newTimeLeft, lastTimestamp: now };
+            return { timeLeft: newTimeLeft, lastTimestamp: Date.now() };
           });
         }, 1000);
       };
@@ -58,7 +64,7 @@ export const useTimerStore = create<TimerState>()(
 
           if (get().isRunning) {
             clearInterval(timerInterval as NodeJS.Timeout);
-            set({ isRunning: false, lastTimestamp: null });
+            set({ isRunning: false, lastTimestamp: Date.now() });
           } else {
             startTimer();
           }
@@ -83,7 +89,7 @@ export const useTimerStore = create<TimerState>()(
             isRunning: false,
             lastTimestamp: null,
           }));
-          startTimer(); // Auto-start new session
+          startTimer();
         },
 
         setFocusTime: (minutes) => {
@@ -108,8 +114,15 @@ export const useTimerStore = create<TimerState>()(
       onRehydrateStorage: () => (state) => {
         if (state) {
           state.setHasHydrated(true);
-          if (state.isRunning) {
-            state.startPauseTimer(); // Resume the timer after hydration
+          const newTimeLeft = calculateTimeLeft(state.lastTimestamp, state.timeLeft);
+
+          state.timeLeft = newTimeLeft;
+
+          if (state.isRunning && newTimeLeft > 0) {
+            state.startPauseTimer(); // Resume the timer automatically
+          } else {
+            state.isRunning = false;
+            state.lastTimestamp = null;
           }
         }
       },
