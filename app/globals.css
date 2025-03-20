@@ -27,3 +27,66 @@ button, a {
 .custom-cursor {
   cursor: url('/CursorPointer.png') 5 5, pointer !important;
 }
+
+.react-calendar__tile {
+  cursor: pointer !important; /* Forces the cursor to apply */
+}
+
+.custom-calendar {
+  width: 100%;
+  border: none;
+  font-family: "Pangolin", cursive;
+  background: transparent;
+}
+
+.react-calendar {
+  border-radius: 10px;
+  overflow: hidden;
+  padding: 10px;
+}
+
+.react-calendar__tile {
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out;
+  padding: 10px;
+}
+
+.react-calendar__tile--now {
+  background: transparent !important; /* Removes yellow background */
+  border: 1px solid #f96f5d !important; /* Keeps the red outline */
+  color: inherit !important; /* Inherits text color instead of hiding it */
+  font-weight: bold;
+}
+
+
+
+.react-calendar__tile:enabled:hover,
+.react-calendar__tile:enabled:focus {
+  background-color: #f96f5d;
+  color: #FAF3DD;
+  font-weight: bold;
+}
+
+.react-calendar__tile--active {
+  background-color: #f96f5d !important;
+  color: #FAF3DD !important;
+  font-weight: bold;
+}
+
+.react-calendar__month-view__days__day--weekend {
+  color: #f96f5d;
+}
+
+.today-highlight {
+  border: 2px solid #f96f5d;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.react-calendar * {
+  cursor: url('/CursorPointer.png') 5 5, pointer !important;
+}
+
+.react-calendar__tile {
+  cursor: url('/CursorPointer.png') 5 5, pointer !important;
+}
