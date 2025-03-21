@@ -7,7 +7,7 @@ import { Calendar, BookOpen } from 'lucide-react';
 interface StudyPlanFormProps {
   userId: string;
   setStudyPlans: React.Dispatch<React.SetStateAction<StudyPlan[]>>;
-  onPlanCreated?: () => void;
+  onPlanCreated?: (newPlan: StudyPlan) => void;
 }
 
 export default function StudyPlanForm({ userId, setStudyPlans, onPlanCreated }: StudyPlanFormProps) {
@@ -58,11 +58,21 @@ export default function StudyPlanForm({ userId, setStudyPlans, onPlanCreated }: 
 
     try {
       const newPlan = await apiClient.createStudyPlan(userId, subject, examDate);
+      
+      // Update local state
       setStudyPlans((prev) => [newPlan, ...prev]);
+      
+      // Reset form
       setSubject('');
       setExamDate('');
+      
+      // Show success message
       toast.success('Study plan created successfully!');
-      onPlanCreated?.();
+      
+      // Pass the new plan to the callback
+      if (onPlanCreated) {
+        onPlanCreated(newPlan);
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
       setError(errorMessage);

@@ -29,6 +29,7 @@ export default function StudyPlanPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [isFetching, setIsFetching] = useState(false);
+  const [lastCreatedPlan, setLastCreatedPlan] = useState<StudyPlan | null>(null);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -38,14 +39,14 @@ export default function StudyPlanPage() {
   }, []);
 
   // Fetch study plans from API
-  const fetchPlans = useCallback(async () => {
+  const fetchPlans = useCallback(async (bustCache: boolean = false) => {
     if (!userId) return;
     
     setIsFetching(true);
     setError(null);
 
     try {
-      const data = await apiClient.getStudyPlans(userId, page, ITEMS_PER_PAGE);
+      const data = await apiClient.getStudyPlans(userId, page, ITEMS_PER_PAGE, bustCache);
       
       if (Array.isArray(data?.plans)) {
         setStudyPlans(data.plans || []);
@@ -71,8 +72,29 @@ export default function StudyPlanPage() {
 
   // Fetch study plans when user logs in or page changes
   useEffect(() => {
-    fetchPlans();
+    fetchPlans(false);
   }, [fetchPlans, page]);
+
+  // Ensure newly created plan is displayed
+  useEffect(() => {
+    if (lastCreatedPlan) {
+      // Check if the plan is already in the studyPlans array
+      const planExists = studyPlans.some(plan => plan.id === lastCreatedPlan.id);
+      
+      if (!planExists && page === 1) {
+        // Temporarily update UI with local state
+        setStudyPlans(prevPlans => [lastCreatedPlan, ...prevPlans]);
+        
+        // Refetch plans after a delay to ensure server has processed the new plan
+        const timer = setTimeout(() => {
+          fetchPlans(true);
+          setLastCreatedPlan(null);
+        }, 1000);
+        
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [lastCreatedPlan, studyPlans, page, fetchPlans]);
 
   // Handle study plan deletion
   const handleDelete = async (planId: string) => {
@@ -103,6 +125,22 @@ export default function StudyPlanPage() {
     } finally {
       setIsDeleting(null);
     }
+  };
+
+  const handlePlanCreated = (newPlan: StudyPlan) => {
+    // Store the new plan in state to ensure it displays immediately
+    setLastCreatedPlan(newPlan);
+    
+    // Reset to first page
+    setPage(1);
+    
+    // Fetch with cache busting to get fresh data
+    fetchPlans(true);
+    
+    // Also schedule another refresh after a delay
+    setTimeout(() => {
+      fetchPlans(true);
+    }, 2000);
   };
 
   if (status === 'loading') {
@@ -147,10 +185,7 @@ export default function StudyPlanPage() {
             <StudyPlanForm 
               userId={userId ?? ''} 
               setStudyPlans={setStudyPlans}
-              onPlanCreated={() => {
-                setPage(1);
-                fetchPlans();
-              }}
+              onPlanCreated={handlePlanCreated}
             />
           </motion.div>
 

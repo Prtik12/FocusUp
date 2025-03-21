@@ -43,17 +43,28 @@ By **${examDate}**, you will be able to [List 3-4 specific, measurable skills].
 // GET handler: Fetch study plans with pagination
 export async function GET(req: NextRequest) {
   try {
-    const headers = new Headers();
-    headers.set('Cache-Control', `s-maxage=${CACHE_DURATION}, stale-while-revalidate`);
-
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get('userId');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '6');
+    // Add timestamp parameter for cache busting
+    const timestamp = searchParams.get('t');
+
+    // Set cache control headers based on whether this is a cache-busting request
+    const headers = new Headers();
+    if (timestamp) {
+      // If timestamp is provided, don't cache
+      headers.set('Cache-Control', 'no-store, max-age=0');
+    } else {
+      // Default caching behavior
+      headers.set('Cache-Control', `s-maxage=${CACHE_DURATION}, stale-while-revalidate`);
+    }
 
     if (!userId) {
       return NextResponse.json({ error: 'Missing userId parameter' }, { status: 400, headers });
     }
+
+    console.log(`Fetching study plans for userId: ${userId}, page: ${page}, timestamp: ${timestamp || 'none'}`);
 
     const skip = (page - 1) * limit;
     const total = await prisma.studyPlan.count({ where: { userId } });
@@ -65,6 +76,8 @@ export async function GET(req: NextRequest) {
       select: { id: true, subject: true, examDate: true, content: true, createdAt: true }
     });
 
+    console.log(`Found ${plans.length} plans for user ${userId}`);
+    
     return NextResponse.json({ plans, total, page, totalPages: Math.ceil(total / limit) }, { headers, status: 200 });
 
   } catch (error) {
@@ -133,7 +146,12 @@ export async function POST(req: NextRequest) {
     });
 
     console.log('Study plan created successfully:', newPlan.id);
-    return NextResponse.json(newPlan, { status: 201 });
+    
+    // Set cache control to prevent caching of this response
+    const headers = new Headers();
+    headers.set('Cache-Control', 'no-store, max-age=0');
+    
+    return NextResponse.json(newPlan, { status: 201, headers });
 
   } catch (error) {
     console.error('Error creating study plan:', error);
@@ -165,8 +183,12 @@ export async function DELETE(req: NextRequest) {
     }
 
     await prisma.studyPlan.delete({ where: { id: planId } });
+    
+    // Set cache control to prevent caching of this response
+    const headers = new Headers();
+    headers.set('Cache-Control', 'no-store, max-age=0');
 
-    return NextResponse.json({ success: true }, { status: 200 });
+    return NextResponse.json({ success: true }, { status: 200, headers });
 
   } catch (error) {
     console.error('Error deleting study plan:', error);
