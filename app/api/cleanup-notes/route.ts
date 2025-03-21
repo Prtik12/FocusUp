@@ -5,20 +5,22 @@ import prisma from "@/lib/prisma";
 const EXPIRATION_DAYS = 90;
 
 export async function GET() {
-    try {
-      const expirationDate = new Date();
-      expirationDate.setDate(expirationDate.getDate() - EXPIRATION_DAYS);
-  
-      const deletedNotes = await prisma.note.deleteMany({
-        where: { createdAt: { lt: expirationDate } },
-      });
-  
-      return NextResponse.json({
-        message: `Deleted ${deletedNotes.count} old notes.`,
-      });
-    } catch (error) {
-      console.error("Error deleting old notes:", error);
-      return NextResponse.json({ error: "Failed to delete old notes." }, { status: 500 });
-    }
+  try {
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() - EXPIRATION_DAYS);
+
+    const deletedNotes = await prisma.note.deleteMany({
+      where: { createdAt: { lt: expirationDate } },
+    });
+
+    return NextResponse.json({
+      message: `Deleted ${deletedNotes.count} old notes.`,
+    });
+  } catch (error) {
+    console.error("Error deleting old notes:", error);
+    return NextResponse.json(
+      { error: "Failed to delete old notes." },
+      { status: 500 },
+    );
   }
-  
+}

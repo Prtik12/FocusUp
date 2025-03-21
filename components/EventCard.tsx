@@ -30,7 +30,9 @@ export default function EventCard({ event, deleteEvent }: EventCardProps) {
       exit={{ opacity: 0, y: -5 }}
       className="event-card flex justify-between items-center bg-white/80 dark:bg-[#4a3628]/80 dark:text-[#FAF3DD] p-3.5 rounded-lg shadow-md border border-gray-200/50 dark:border-[#FAF3DD]/20 transition-all hover:shadow-lg backdrop-blur-sm"
     >
-      <span className="font-medium text-gray-800 dark:text-[#FAF3DD] truncate pr-2">{event.title}</span>
+      <span className="font-medium text-gray-800 dark:text-[#FAF3DD] truncate pr-2">
+        {event.title}
+      </span>
 
       <button
         onClick={handleDelete}

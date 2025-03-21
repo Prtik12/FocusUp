@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Pangolin } from "next/font/google";
 import { AuthProvider } from "@/providers/NextAuthProviders";
 import { ThemeProvider } from "@/providers/ThemeProviders";
-import { Analytics } from "@vercel/analytics/react"
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -25,7 +25,9 @@ const pangolin = Pangolin({
 export const metadata: Metadata = {
   title: "FocusUp",
   description: "A productivity app to help you focus on your tasks.",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://focusup.vercel.app"),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "https://focusup.vercel.app",
+  ),
   openGraph: {
     title: "FocusUp",
     description: "A productivity app to help you focus on your tasks.",
@@ -34,18 +36,18 @@ export const metadata: Metadata = {
         url: "/banner.png",
         width: 1200,
         height: 630,
-        alt: "FocusUp App Banner"
-      }
+        alt: "FocusUp App Banner",
+      },
     ],
-    type: "website"
+    type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "FocusUp",
     description: "A productivity app to help you focus on your tasks.",
     images: ["/banner.png"],
-    creator: "@focusup"
-  }
+    creator: "@focusup",
+  },
 };
 
 export default function RootLayout({
@@ -55,9 +57,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} ${pangolin.variable} font-pangolin`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} ${pangolin.variable} font-pangolin`}
+      >
         <AuthProvider>
-          <ThemeProvider>{children}<Analytics /></ThemeProvider>
+          <ThemeProvider>
+            {children}
+            <Analytics />
+          </ThemeProvider>
         </AuthProvider>
       </body>
     </html>

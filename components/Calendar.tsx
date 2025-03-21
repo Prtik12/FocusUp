@@ -10,7 +10,7 @@ type CalendarProps = {
   eventListRef?: React.RefObject<HTMLDivElement>;
 };
 
-const DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const DAYS = ["S", "M", "T", "W", "T", "F", "S"];
 
 export default function Calendar({
   selectedDate,
@@ -54,22 +54,23 @@ export default function Calendar({
         locale="en-US"
         tileClassName={({ date, view }) => {
           if (view !== "month") return "";
-          
+
           const today = new Date();
           let className = "custom-cursor";
-          
+
           const hasEvent = events.some(
-            (event) => new Date(event.date).toDateString() === date.toDateString()
+            (event) =>
+              new Date(event.date).toDateString() === date.toDateString(),
           );
-          
+
           if (hasEvent) {
             className += " calendar-day-with-events";
           }
-          
+
           if (date.toDateString() === today.toDateString()) {
             className += " today-highlight";
           }
-          
+
           return className;
         }}
       />

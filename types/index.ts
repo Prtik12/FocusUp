@@ -11,4 +11,4 @@ export type UserStats = {
     date: string;
     minutes: number;
   }[];
-}; 
+};

@@ -15,16 +15,16 @@ export default function StreakCard({ streak }: StreakCardProps) {
     >
       <div className="flex flex-col items-center justify-center text-center">
         <FiAward size={36} className="mb-3" />
-        
+
         <div className="flex items-center justify-center my-2">
           <div className="text-5xl font-bold">{streak}</div>
           <div className="ml-2 text-xl">days</div>
         </div>
-        
+
         <p className="text-sm opacity-80 mt-2">
           Keep logging in daily to increase your streak!
         </p>
       </div>
     </motion.div>
   );
-} 
+}

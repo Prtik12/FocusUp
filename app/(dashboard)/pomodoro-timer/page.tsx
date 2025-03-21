@@ -9,7 +9,11 @@ import { useTimerStore } from "@/store/useTimerStore";
 import { Pangolin } from "next/font/google";
 import { toast } from "sonner";
 
-const pangolin = Pangolin({ weight: "400", subsets: ["latin"], display: "swap" });
+const pangolin = Pangolin({
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+});
 
 // Flip card animation
 const flipVariants = {
@@ -19,15 +23,15 @@ const flipVariants = {
 
 // Banner animation
 const bannerVariants = {
-  focus: { 
-    backgroundColor: "#F96F5D", 
+  focus: {
+    backgroundColor: "#F96F5D",
     scale: [1, 1.03, 1],
-    transition: { duration: 0.5 }
+    transition: { duration: 0.5 },
   },
-  rest: { 
-    backgroundColor: "#4CAF50", 
+  rest: {
+    backgroundColor: "#4CAF50",
     scale: [1, 1.03, 1],
-    transition: { duration: 0.5 }
+    transition: { duration: 0.5 },
   },
 };
 
@@ -46,7 +50,8 @@ const PomodoroTimer = () => {
 
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
   const chimeRef = useRef<HTMLAudioElement | null>(null);
-  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | null>(null);
+  const [notificationPermission, setNotificationPermission] =
+    useState<NotificationPermission | null>(null);
   const [modeChanging, setModeChanging] = useState(false);
   const [completedCycles, setCompletedCycles] = useState(0);
 
@@ -60,11 +65,14 @@ const PomodoroTimer = () => {
 
   // Request notification permission
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'Notification' in window) {
+    if (typeof window !== "undefined" && "Notification" in window) {
       setNotificationPermission(Notification.permission);
-      
-      if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
-        Notification.requestPermission().then(permission => {
+
+      if (
+        Notification.permission !== "granted" &&
+        Notification.permission !== "denied"
+      ) {
+        Notification.requestPermission().then((permission) => {
           setNotificationPermission(permission);
         });
       }
@@ -92,30 +100,32 @@ const PomodoroTimer = () => {
       // Play chime sound
       if (chimeRef.current) {
         chimeRef.current.currentTime = 0;
-        chimeRef.current.play().catch((err) => console.error("Chime failed to play:", err));
+        chimeRef.current
+          .play()
+          .catch((err) => console.error("Chime failed to play:", err));
       }
 
       // Set mode changing to prevent multiple switches
       setModeChanging(true);
-      
+
       // Update completed cycles counter (only when finishing a focus session)
       if (isFocusMode) {
-        setCompletedCycles(prev => prev + 1);
+        setCompletedCycles((prev) => prev + 1);
       }
 
       // Determine next mode message
       const currentMode = isFocusMode ? "Focus" : "Rest";
       const nextMode = isFocusMode ? "Rest" : "Focus";
       const message = `${currentMode} session completed! Time for ${nextMode} mode.`;
-      
+
       // Show toast notification
       toast.success(message, { duration: 5000 });
 
       // Show browser notification
-      if (notificationPermission === 'granted') {
-        new Notification('Pomodoro Timer', { 
+      if (notificationPermission === "granted") {
+        new Notification("Pomodoro Timer", {
           body: message,
-          icon: '/favicon.ico'
+          icon: "/favicon.ico",
         });
       }
 
@@ -136,11 +146,11 @@ const PomodoroTimer = () => {
   };
 
   const handleRequestNotifications = () => {
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      Notification.requestPermission().then(permission => {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      Notification.requestPermission().then((permission) => {
         setNotificationPermission(permission);
-        if (permission === 'granted') {
-          toast.success('Notifications enabled for timer completion!');
+        if (permission === "granted") {
+          toast.success("Notifications enabled for timer completion!");
         }
       });
     }
@@ -152,15 +162,12 @@ const PomodoroTimer = () => {
     .toString()
     .padStart(2, "0")
     .split("");
-  const seconds = (timeLeft % 60)
-    .toString()
-    .padStart(2, "0")
-    .split("");
+  const seconds = (timeLeft % 60).toString().padStart(2, "0").split("");
 
   // Determine action button text based on timer state
-  const actionButtonText = isRunning 
-    ? "Pause" 
-    : timeLeft === 0 
+  const actionButtonText = isRunning
+    ? "Pause"
+    : timeLeft === 0
       ? `Start ${isFocusMode ? "Rest" : "Focus"}`
       : "Start";
 
@@ -193,7 +200,8 @@ const PomodoroTimer = () => {
           </h2>
           {completedCycles > 0 && (
             <p className="text-sm mt-2 opacity-80">
-              {completedCycles} {completedCycles === 1 ? 'cycle' : 'cycles'} completed
+              {completedCycles} {completedCycles === 1 ? "cycle" : "cycles"}{" "}
+              completed
             </p>
           )}
         </motion.div>
@@ -219,7 +227,11 @@ const PomodoroTimer = () => {
                     variants={flipVariants}
                     initial="initial"
                     animate="animate"
-                    exit={{ rotateX: 90, opacity: 0, transition: { duration: 0.3 } }}
+                    exit={{
+                      rotateX: 90,
+                      opacity: 0,
+                      transition: { duration: 0.3 },
+                    }}
                   >
                     {char}
                   </motion.div>
@@ -260,8 +272,8 @@ const PomodoroTimer = () => {
           Focus Time: {focusTime / 60} min | Rest Time: {restTime / 60} min
         </p>
 
-        {notificationPermission !== 'granted' && (
-          <button 
+        {notificationPermission !== "granted" && (
+          <button
             onClick={handleRequestNotifications}
             className="mt-4 text-sm text-[#F96F5D] underline hover:text-[#e85b4b] transition-colors custom-cursor"
           >

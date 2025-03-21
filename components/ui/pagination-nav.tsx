@@ -5,16 +5,21 @@ interface PaginationNavProps {
   isDisabled?: boolean;
 }
 
-export default function PaginationNav({ page, setPage, pageCount, isDisabled = false }: PaginationNavProps) {
+export default function PaginationNav({
+  page,
+  setPage,
+  pageCount,
+  isDisabled = false,
+}: PaginationNavProps) {
   const handlePrevPage = () => {
     if (page > 1 && !isDisabled) {
-      setPage(prev => prev - 1);
+      setPage((prev) => prev - 1);
     }
   };
 
   const handleNextPage = () => {
     if (page < pageCount && !isDisabled) {
-      setPage(prev => prev + 1);
+      setPage((prev) => prev + 1);
     }
   };
 
@@ -27,24 +32,24 @@ export default function PaginationNav({ page, setPage, pageCount, isDisabled = f
         disabled={page === 1 || isDisabled}
         className={`px-4 py-2 rounded-md transition-colors ${
           page === 1 || isDisabled
-            ? 'bg-gray-300 cursor-not-allowed'
-            : 'bg-[#4A3628] dark:bg-[#FAF3DD] text-[#FAF3DD] dark:text-[#4A3628] hover:bg-[#3a2b1f] dark:hover:bg-[#e3dcc9]'
+            ? "bg-gray-300 cursor-not-allowed"
+            : "bg-[#4A3628] dark:bg-[#FAF3DD] text-[#FAF3DD] dark:text-[#4A3628] hover:bg-[#3a2b1f] dark:hover:bg-[#e3dcc9]"
         }`}
       >
         Previous
       </button>
-      
+
       <span className="text-[#4A3628] dark:text-[#FAF3DD]">
         Page {page} of {pageCount}
       </span>
-      
+
       <button
         onClick={handleNextPage}
         disabled={page === pageCount || isDisabled}
         className={`px-4 py-2 rounded-md transition-colors ${
           page === pageCount || isDisabled
-            ? 'bg-gray-300 cursor-not-allowed'
-            : 'bg-[#4A3628] dark:bg-[#FAF3DD] text-[#FAF3DD] dark:text-[#4A3628] hover:bg-[#3a2b1f] dark:hover:bg-[#e3dcc9]'
+            ? "bg-gray-300 cursor-not-allowed"
+            : "bg-[#4A3628] dark:bg-[#FAF3DD] text-[#FAF3DD] dark:text-[#4A3628] hover:bg-[#3a2b1f] dark:hover:bg-[#e3dcc9]"
         }`}
       >
         Next
@@ -52,4 +57,3 @@ export default function PaginationNav({ page, setPage, pageCount, isDisabled = f
     </div>
   );
 }
-  

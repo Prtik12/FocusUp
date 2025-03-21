@@ -8,7 +8,10 @@ type UpcomingEventsProps = {
   deleteEvent: (id: number) => Promise<void>;
 };
 
-export default function UpcomingEvents({ events, deleteEvent }: UpcomingEventsProps) {
+export default function UpcomingEvents({
+  events,
+  deleteEvent,
+}: UpcomingEventsProps) {
   const today = new Date();
   const nextWeek = addDays(today, 7);
 
@@ -21,14 +24,17 @@ export default function UpcomingEvents({ events, deleteEvent }: UpcomingEventsPr
       return new Date(a.date).getTime() - new Date(b.date).getTime();
     });
 
-  const groupedEvents = upcomingEvents.reduce((acc, event) => {
-    const dateKey = format(parseISO(event.date), 'yyyy-MM-dd');
-    if (!acc[dateKey]) {
-      acc[dateKey] = [];
-    }
-    acc[dateKey].push(event);
-    return acc;
-  }, {} as Record<string, Event[]>);
+  const groupedEvents = upcomingEvents.reduce(
+    (acc, event) => {
+      const dateKey = format(parseISO(event.date), "yyyy-MM-dd");
+      if (!acc[dateKey]) {
+        acc[dateKey] = [];
+      }
+      acc[dateKey].push(event);
+      return acc;
+    },
+    {} as Record<string, Event[]>,
+  );
 
   return (
     <motion.div
@@ -63,4 +69,4 @@ export default function UpcomingEvents({ events, deleteEvent }: UpcomingEventsPr
       </div>
     </motion.div>
   );
-} 
+}

@@ -7,9 +7,13 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import BottomBar from "@/components/BottomBar";
-import imageCompression from "browser-image-compression"; 
+import imageCompression from "browser-image-compression";
 
-const pangolin = Pangolin({ weight: "400", subsets: ["latin"], display: "swap" });
+const pangolin = Pangolin({
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+});
 
 export default function EditProfile() {
   const { data: session, update } = useSession();
@@ -92,13 +96,12 @@ export default function EditProfile() {
       const data = await response.json();
 
       // ✅ Force update session & UI state
-// ✅ Force NextAuth to refresh the session properly
-const updated = await update();
-if (!updated) throw new Error("Session update failed");
+      // ✅ Force NextAuth to refresh the session properly
+      const updated = await update();
+      if (!updated) throw new Error("Session update failed");
 
-// Manually refetch session data
-router.refresh();
-
+      // Manually refetch session data
+      router.refresh();
 
       if (!updated) throw new Error("Session update failed");
 
@@ -108,7 +111,11 @@ router.refresh();
       router.refresh();
     } catch (error) {
       console.error("Error updating profile:", error);
-      setError(error instanceof Error ? error.message : "Failed to update profile. Please try again.");
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to update profile. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -133,10 +140,21 @@ router.refresh();
 
         {/* Profile Picture */}
         <div className="relative w-32 h-32 rounded-full overflow-hidden mb-4 border-2 border-[#4A3628] dark:border-[#FAF3DD]">
-          <Image src={image} alt="Profile" width={128} height={128} className="w-full h-full object-cover" />
+          <Image
+            src={image}
+            alt="Profile"
+            width={128}
+            height={128}
+            className="w-full h-full object-cover"
+          />
           <label className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center text-white text-sm cursor-pointer opacity-0 hover:opacity-100 transition">
             Change
-            <input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer" />
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="absolute inset-0 opacity-0 cursor-pointer"
+            />
           </label>
         </div>
 
@@ -156,7 +174,9 @@ router.refresh();
           onClick={handleSaveChanges}
           disabled={loading}
           className={`px-6 py-2 rounded-lg transition ${
-            loading ? "bg-gray-400 cursor-not-allowed" : "bg-[#F96F5D] text-white hover:bg-[#e85b4b]"
+            loading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-[#F96F5D] text-white hover:bg-[#e85b4b]"
           }`}
         >
           {loading ? "Saving..." : "Save Changes"}

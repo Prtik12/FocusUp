@@ -1,22 +1,26 @@
 "use client";
 
-import { useEffect, useState, useCallback } from 'react';
-import { apiClient } from '@/lib/api-client';
+import { useEffect, useState, useCallback } from "react";
+import { apiClient } from "@/lib/api-client";
 import { Pangolin } from "next/font/google";
-import { useSession } from 'next-auth/react';
-import StudyPlanForm from '@/components/Forms/StudyPlan/StudyPlanForm';
-import StoredPlan from '@/components/study-plan/StoredPlan';
-import PaginationNav from '@/components/ui/pagination-nav';
-import { motion, AnimatePresence } from 'framer-motion';
-import { StudyPlan } from '@/types/studyPlan';
-import { Toaster, toast } from 'sonner';
-import { useRouter } from 'next/navigation';
-import BottomBar from '@/components/BottomBar';
-import Sidebar from '@/components/Sidebar';
+import { useSession } from "next-auth/react";
+import StudyPlanForm from "@/components/Forms/StudyPlan/StudyPlanForm";
+import StoredPlan from "@/components/study-plan/StoredPlan";
+import PaginationNav from "@/components/ui/pagination-nav";
+import { motion, AnimatePresence } from "framer-motion";
+import { StudyPlan } from "@/types/studyPlan";
+import { Toaster, toast } from "sonner";
+import { useRouter } from "next/navigation";
+import BottomBar from "@/components/BottomBar";
+import Sidebar from "@/components/Sidebar";
 
 const ITEMS_PER_PAGE = 6;
 
-const pangolin = Pangolin({ weight: "400", subsets: ["latin"], display: "swap" });
+const pangolin = Pangolin({
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+});
 
 export default function StudyPlanPage() {
   const { data: session, status } = useSession();
@@ -29,7 +33,9 @@ export default function StudyPlanPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [isFetching, setIsFetching] = useState(false);
-  const [lastCreatedPlan, setLastCreatedPlan] = useState<StudyPlan | null>(null);
+  const [lastCreatedPlan, setLastCreatedPlan] = useState<StudyPlan | null>(
+    null,
+  );
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -39,35 +45,46 @@ export default function StudyPlanPage() {
   }, []);
 
   // Fetch study plans from API
-  const fetchPlans = useCallback(async (bustCache: boolean = false) => {
-    if (!userId) return;
-    
-    setIsFetching(true);
-    setError(null);
+  const fetchPlans = useCallback(
+    async (bustCache: boolean = false) => {
+      if (!userId) return;
 
-    try {
-      const data = await apiClient.getStudyPlans(userId, page, ITEMS_PER_PAGE, bustCache);
-      
-      if (Array.isArray(data?.plans)) {
-        setStudyPlans(data.plans || []);
-        setTotalPages(Math.ceil((data.total || 0) / ITEMS_PER_PAGE));
-      } else {
-        throw new Error("Invalid response format");
+      setIsFetching(true);
+      setError(null);
+
+      try {
+        const data = await apiClient.getStudyPlans(
+          userId,
+          page,
+          ITEMS_PER_PAGE,
+          bustCache,
+        );
+
+        if (Array.isArray(data?.plans)) {
+          setStudyPlans(data.plans || []);
+          setTotalPages(Math.ceil((data.total || 0) / ITEMS_PER_PAGE));
+        } else {
+          throw new Error("Invalid response format");
+        }
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to fetch study plans";
+        console.error("Error fetching study plans:", errorMessage);
+        setError(errorMessage);
+        toast.error("Failed to load study plans", {
+          description: errorMessage,
+        });
+      } finally {
+        setIsFetching(false);
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch study plans';
-      console.error("Error fetching study plans:", errorMessage);
-      setError(errorMessage);
-      toast.error('Failed to load study plans', { description: errorMessage });
-    } finally {
-      setIsFetching(false);
-    }
-  }, [userId, page]);
+    },
+    [userId, page],
+  );
 
   // Redirect to sign-in if not logged in
   useEffect(() => {
-    if (status === 'loading') return;
-    if (!session) router.push('/signin');
+    if (status === "loading") return;
+    if (!session) router.push("/signin");
   }, [session, status, router]);
 
   // Fetch study plans when user logs in or page changes
@@ -79,18 +96,20 @@ export default function StudyPlanPage() {
   useEffect(() => {
     if (lastCreatedPlan) {
       // Check if the plan is already in the studyPlans array
-      const planExists = studyPlans.some(plan => plan.id === lastCreatedPlan.id);
-      
+      const planExists = studyPlans.some(
+        (plan) => plan.id === lastCreatedPlan.id,
+      );
+
       if (!planExists && page === 1) {
         // Temporarily update UI with local state
-        setStudyPlans(prevPlans => [lastCreatedPlan, ...prevPlans]);
-        
+        setStudyPlans((prevPlans) => [lastCreatedPlan, ...prevPlans]);
+
         // Refetch plans after a delay to ensure server has processed the new plan
         const timer = setTimeout(() => {
           fetchPlans(true);
           setLastCreatedPlan(null);
         }, 1000);
-        
+
         return () => clearTimeout(timer);
       }
     }
@@ -106,7 +125,9 @@ export default function StudyPlanPage() {
       return;
     }
 
-    const shouldDelete = window.confirm("Are you sure you want to delete this study plan?");
+    const shouldDelete = window.confirm(
+      "Are you sure you want to delete this study plan?",
+    );
     if (!shouldDelete) return;
 
     setIsDeleting(planId);
@@ -130,20 +151,20 @@ export default function StudyPlanPage() {
   const handlePlanCreated = (newPlan: StudyPlan) => {
     // Store the new plan in state to ensure it displays immediately
     setLastCreatedPlan(newPlan);
-    
+
     // Reset to first page
     setPage(1);
-    
+
     // Fetch with cache busting to get fresh data
     fetchPlans(true);
-    
+
     // Also schedule another refresh after a delay
     setTimeout(() => {
       fetchPlans(true);
     }, 2000);
   };
 
-  if (status === 'loading') {
+  if (status === "loading") {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#FBF2C0] dark:bg-[#4a3628]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#4A3628] dark:border-[#FAF3DD]"></div>
@@ -154,7 +175,9 @@ export default function StudyPlanPage() {
   if (!session) return null; // Redirect handled by router
 
   return (
-    <div className={`h-max relative ${pangolin.className} ${isMobile ? "px-0 pb-16" : "ml-20 px-0"}`}>
+    <div
+      className={`h-max relative ${pangolin.className} ${isMobile ? "px-0 pb-16" : "ml-20 px-0"}`}
+    >
       {!isMobile && <Sidebar />}
       {isMobile && <BottomBar />}
 
@@ -182,8 +205,8 @@ export default function StudyPlanPage() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="max-w-full mx-auto mb-12"
           >
-            <StudyPlanForm 
-              userId={userId ?? ''} 
+            <StudyPlanForm
+              userId={userId ?? ""}
               setStudyPlans={setStudyPlans}
               onPlanCreated={handlePlanCreated}
             />
@@ -213,9 +236,7 @@ export default function StudyPlanPage() {
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
               >
-                <motion.div
-                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                >
+                <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {studyPlans.map((plan, index) => (
                     <motion.div
                       key={plan.id}
@@ -225,8 +246,8 @@ export default function StudyPlanPage() {
                       transition={{ duration: 0.3, delay: index * 0.1 }}
                       layout
                     >
-                      <StoredPlan 
-                        plan={plan} 
+                      <StoredPlan
+                        plan={plan}
                         onDelete={handleDelete}
                         deleteInProgress={isDeleting === plan.id}
                       />
@@ -239,27 +260,29 @@ export default function StudyPlanPage() {
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.5, delay: 0.4 }}
                 >
-                  <PaginationNav 
-                    page={page} 
-                    setPage={setPage} 
+                  <PaginationNav
+                    page={page}
+                    setPage={setPage}
                     pageCount={totalPages}
                     isDisabled={isFetching}
                   />
                 </motion.div>
               </motion.div>
-            ) : !isFetching && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-center py-12"
-              >
-                <p className="text-xl text-[#4A3628] dark:text-[#FAF3DD] mb-2 font-pangolin">
-                  No study plans found
-                </p>
-                <p className="text-base text-gray-600 dark:text-gray-300 font-pangolin">
-                  Create your first study plan to get started
-                </p>
-              </motion.div>
+            ) : (
+              !isFetching && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center py-12"
+                >
+                  <p className="text-xl text-[#4A3628] dark:text-[#FAF3DD] mb-2 font-pangolin">
+                    No study plans found
+                  </p>
+                  <p className="text-base text-gray-600 dark:text-gray-300 font-pangolin">
+                    Create your first study plan to get started
+                  </p>
+                </motion.div>
+              )
             )}
           </AnimatePresence>
         </div>

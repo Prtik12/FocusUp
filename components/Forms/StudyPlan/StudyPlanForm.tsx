@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { apiClient } from '@/lib/api-client';
-import { StudyPlan } from '@/types/studyPlan';
-import { toast } from 'sonner';
-import { Calendar, BookOpen } from 'lucide-react';
+import { useState } from "react";
+import { apiClient } from "@/lib/api-client";
+import { StudyPlan } from "@/types/studyPlan";
+import { toast } from "sonner";
+import { Calendar, BookOpen } from "lucide-react";
 
 interface StudyPlanFormProps {
   userId: string;
@@ -10,9 +10,13 @@ interface StudyPlanFormProps {
   onPlanCreated?: (newPlan: StudyPlan) => void;
 }
 
-export default function StudyPlanForm({ userId, setStudyPlans, onPlanCreated }: StudyPlanFormProps) {
-  const [subject, setSubject] = useState('');
-  const [examDate, setExamDate] = useState('');
+export default function StudyPlanForm({
+  userId,
+  setStudyPlans,
+  onPlanCreated,
+}: StudyPlanFormProps) {
+  const [subject, setSubject] = useState("");
+  const [examDate, setExamDate] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,92 +24,97 @@ export default function StudyPlanForm({ userId, setStudyPlans, onPlanCreated }: 
     try {
       const today = new Date();
       today.setHours(0, 0, 0, 0); // Reset time to start of day
-      
+
       // Check subject
       if (!subject.trim()) {
-        setError('Please enter a subject');
+        setError("Please enter a subject");
         return false;
       }
-      
+
       // Check if examDate is provided
       if (!examDate) {
-        setError('Please select an exam date');
+        setError("Please select an exam date");
         return false;
       }
-      
+
       // Validate date format
       const datePattern = /^\d{4}-\d{2}-\d{2}$/;
       if (!datePattern.test(examDate)) {
-        setError('Invalid date format. Please use YYYY-MM-DD');
+        setError("Invalid date format. Please use YYYY-MM-DD");
         return false;
       }
-      
+
       // Parse date
       const selectedDate = new Date(examDate);
       selectedDate.setHours(0, 0, 0, 0); // Reset time to start of day
-      
+
       // Check if valid date
       if (isNaN(selectedDate.getTime())) {
-        setError('Invalid date. Please select a valid date');
+        setError("Invalid date. Please select a valid date");
         return false;
       }
-      
+
       // Check if in the past
       if (selectedDate < today) {
-        setError('Exam date cannot be in the past');
+        setError("Exam date cannot be in the past");
         return false;
       }
-      
+
       // Check if more than 1 year in the future
       const maxDate = new Date(today);
       maxDate.setFullYear(maxDate.getFullYear() + 1);
       if (selectedDate > maxDate) {
-        setError('Exam date cannot be more than 1 year in the future');
+        setError("Exam date cannot be more than 1 year in the future");
         return false;
       }
-      
+
       setError(null);
       return true;
     } catch (err) {
-      console.error('Date validation error:', err);
-      setError('An error occurred during validation. Please try again.');
+      console.error("Date validation error:", err);
+      setError("An error occurred during validation. Please try again.");
       return false;
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     setLoading(true);
     setError(null);
 
     try {
-      const newPlan = await apiClient.createStudyPlan(userId, subject, examDate);
-      
+      const newPlan = await apiClient.createStudyPlan(
+        userId,
+        subject,
+        examDate,
+      );
+
       // Update local state
       setStudyPlans((prev) => [newPlan, ...prev]);
-      
+
       // Reset form
-      setSubject('');
-      setExamDate('');
-      
+      setSubject("");
+      setExamDate("");
+
       // Show success message
-      toast.success('Study plan created successfully!');
-      
+      toast.success("Study plan created successfully!");
+
       // Pass the new plan to the callback
       if (onPlanCreated) {
         onPlanCreated(newPlan);
       }
     } catch (err) {
-      console.error('Error creating study plan:', err);
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+      console.error("Error creating study plan:", err);
+      const errorMessage =
+        err instanceof Error ? err.message : "An unknown error occurred.";
       setError(errorMessage);
-      toast.error('Failed to create study plan', {
-        description: errorMessage
+      toast.error("Failed to create study plan", {
+        description: errorMessage,
       });
     } finally {
       setLoading(false);
@@ -113,7 +122,10 @@ export default function StudyPlanForm({ userId, setStudyPlans, onPlanCreated }: 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-[#FAF3DD] dark:bg-[#2A1F1A] p-8 rounded-xl shadow-sm">
+    <form
+      onSubmit={handleSubmit}
+      className="bg-[#FAF3DD] dark:bg-[#2A1F1A] p-8 rounded-xl shadow-sm"
+    >
       <div className="space-y-6">
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -140,7 +152,7 @@ export default function StudyPlanForm({ userId, setStudyPlans, onPlanCreated }: 
             value={examDate}
             onChange={(e) => setExamDate(e.target.value)}
             className="w-full pl-10 pr-4 py-3 border-0 border-b-2 border-gray-200 dark:border-gray-700 focus:border-[#4A3628] dark:focus:border-[#FAF3DD] bg-transparent text-[#4A3628] dark:text-[#FAF3DD] focus:ring-0 transition-colors custom-cursor"
-            min={new Date().toISOString().split('T')[0]}
+            min={new Date().toISOString().split("T")[0]}
             required
           />
         </div>
@@ -156,11 +168,11 @@ export default function StudyPlanForm({ userId, setStudyPlans, onPlanCreated }: 
           disabled={loading}
           className={`w-full py-3 px-4 rounded-lg transition-all ${
             loading
-              ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-[#4A3628] dark:bg-[#FAF3DD] text-[#FAF3DD] dark:text-[#4A3628] hover:bg-[#3a2b1f] dark:hover:bg-[#e3dcc9] hover:shadow-md'
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-[#4A3628] dark:bg-[#FAF3DD] text-[#FAF3DD] dark:text-[#4A3628] hover:bg-[#3a2b1f] dark:hover:bg-[#e3dcc9] hover:shadow-md"
           }`}
         >
-          {loading ? 'Generating...' : 'Generate Plan'}
+          {loading ? "Generating..." : "Generate Plan"}
         </button>
       </div>
 

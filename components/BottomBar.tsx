@@ -38,19 +38,28 @@ export default function BottomBar() {
       ))}
 
       {/* Theme Toggle */}
-      <button onClick={toggleTheme} className="flex flex-col items-center p-2 hover:text-[#F96F5D] custom-cursor">
+      <button
+        onClick={toggleTheme}
+        className="flex flex-col items-center p-2 hover:text-[#F96F5D] custom-cursor"
+      >
         {theme === "dark" ? <FiSun size={24} /> : <FiMoon size={24} />}
         <span className="text-xs">Theme</span>
       </button>
 
       {/* Profile */}
-      <button onClick={() => router.push("/profile")} className="flex flex-col items-center p-2 hover:text-[#F96F5D] custom-cursor">
+      <button
+        onClick={() => router.push("/profile")}
+        className="flex flex-col items-center p-2 hover:text-[#F96F5D] custom-cursor"
+      >
         <FiUser size={24} />
         <span className="text-xs">Profile</span>
       </button>
 
       {/* Logout */}
-      <button onClick={handleSignOut} className="flex flex-col items-center p-2 hover:text-[#F96F5D] custom-cursor">
+      <button
+        onClick={handleSignOut}
+        className="flex flex-col items-center p-2 hover:text-[#F96F5D] custom-cursor"
+      >
         <FiLogOut size={24} />
         <span className="text-xs">Logout</span>
       </button>

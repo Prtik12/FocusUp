@@ -16,12 +16,17 @@ type UsageGraphProps = {
   isLoading: boolean;
 };
 
-export default function UsageGraph({ activityData, isLoading }: UsageGraphProps) {
+export default function UsageGraph({
+  activityData,
+  isLoading,
+}: UsageGraphProps) {
   // Add custom cursor to Recharts components after rendering
   useEffect(() => {
-    const rechartElements = document.querySelectorAll('.recharts-wrapper, .recharts-surface, .recharts-layer, .recharts-bar-rectangle, .recharts-tooltip-wrapper');
-    rechartElements.forEach(element => {
-      element.classList.add('custom-cursor');
+    const rechartElements = document.querySelectorAll(
+      ".recharts-wrapper, .recharts-surface, .recharts-layer, .recharts-bar-rectangle, .recharts-tooltip-wrapper",
+    );
+    rechartElements.forEach((element) => {
+      element.classList.add("custom-cursor");
     });
   }, [activityData, isLoading]);
 
@@ -40,7 +45,11 @@ export default function UsageGraph({ activityData, isLoading }: UsageGraphProps)
         </div>
       ) : (
         <div className="h-64 w-full custom-cursor">
-          <ResponsiveContainer width="100%" height="100%" className="custom-cursor">
+          <ResponsiveContainer
+            width="100%"
+            height="100%"
+            className="custom-cursor"
+          >
             <BarChart
               data={activityData}
               margin={{
@@ -51,35 +60,39 @@ export default function UsageGraph({ activityData, isLoading }: UsageGraphProps)
               }}
               className="custom-cursor"
             >
-              <CartesianGrid strokeDasharray="3 3" opacity={0.2} className="custom-cursor" />
-              <XAxis 
-                dataKey="formattedDate" 
-                tick={{ fill: '#4A3628', fontSize: 12 }}
+              <CartesianGrid
+                strokeDasharray="3 3"
+                opacity={0.2}
+                className="custom-cursor"
+              />
+              <XAxis
+                dataKey="formattedDate"
+                tick={{ fill: "#4A3628", fontSize: 12 }}
                 tickMargin={10}
                 className="dark:fill-[#FAF3DD] custom-cursor"
               />
               <YAxis
-                label={{ 
-                  value: 'Minutes', 
-                  angle: -90, 
-                  position: 'insideLeft',
-                  className: 'dark:fill-[#FAF3DD]'
+                label={{
+                  value: "Minutes",
+                  angle: -90,
+                  position: "insideLeft",
+                  className: "dark:fill-[#FAF3DD]",
                 }}
-                tick={{ fill: '#4A3628', fontSize: 12 }}
+                tick={{ fill: "#4A3628", fontSize: 12 }}
                 className="dark:fill-[#FAF3DD] custom-cursor"
               />
               <Tooltip
-                contentStyle={{ 
-                  backgroundColor: '#FBF2C0', 
-                  border: 'none',
-                  borderRadius: '8px',
-                  color: '#4A3628'
+                contentStyle={{
+                  backgroundColor: "#FBF2C0",
+                  border: "none",
+                  borderRadius: "8px",
+                  color: "#4A3628",
                 }}
-                cursor={{ fill: 'rgba(249, 111, 93, 0.1)' }}
-                formatter={(value) => [`${value} mins`, 'Time Spent']}
+                cursor={{ fill: "rgba(249, 111, 93, 0.1)" }}
+                formatter={(value) => [`${value} mins`, "Time Spent"]}
               />
-              <Bar 
-                dataKey="minutes" 
+              <Bar
+                dataKey="minutes"
                 fill="#F96F5D"
                 radius={[4, 4, 0, 0]}
                 animationDuration={1000}
@@ -95,4 +108,4 @@ export default function UsageGraph({ activityData, isLoading }: UsageGraphProps)
       </p>
     </motion.div>
   );
-} 
+}

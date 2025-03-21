@@ -36,11 +36,14 @@ export async function PUT(req: Request) {
       user: {
         id: updatedUser.id,
         name: updatedUser.name,
-        email: updatedUser.email
-      }
+        email: updatedUser.email,
+      },
     });
   } catch (error) {
     console.error("Profile update error:", error);
-    return NextResponse.json({ message: "Failed to update profile" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Failed to update profile" },
+      { status: 500 },
+    );
   }
 }

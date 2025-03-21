@@ -17,7 +17,10 @@ interface TimerState {
 }
 
 // Helper function to calculate time left based on last timestamp
-const calculateTimeLeft = (lastTimestamp: number | null, prevTimeLeft: number) => {
+const calculateTimeLeft = (
+  lastTimestamp: number | null,
+  prevTimeLeft: number,
+) => {
   if (!lastTimestamp) return prevTimeLeft;
   const now = Date.now();
   const elapsed = Math.floor((now - lastTimestamp) / 1000);
@@ -36,7 +39,10 @@ export const useTimerStore = create<TimerState>()(
 
         timerInterval = setInterval(() => {
           set((state) => {
-            const newTimeLeft = calculateTimeLeft(state.lastTimestamp, state.timeLeft);
+            const newTimeLeft = calculateTimeLeft(
+              state.lastTimestamp,
+              state.timeLeft,
+            );
 
             if (newTimeLeft <= 0) {
               clearInterval(timerInterval as NodeJS.Timeout);
@@ -114,7 +120,10 @@ export const useTimerStore = create<TimerState>()(
       onRehydrateStorage: () => (state) => {
         if (state) {
           state.setHasHydrated(true);
-          const newTimeLeft = calculateTimeLeft(state.lastTimestamp, state.timeLeft);
+          const newTimeLeft = calculateTimeLeft(
+            state.lastTimestamp,
+            state.timeLeft,
+          );
 
           state.timeLeft = newTimeLeft;
 
@@ -126,6 +135,6 @@ export const useTimerStore = create<TimerState>()(
           }
         }
       },
-    }
-  )
+    },
+  ),
 );

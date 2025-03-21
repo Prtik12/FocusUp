@@ -3,7 +3,11 @@
 import { motion } from "framer-motion";
 import { Pangolin } from "next/font/google";
 
-const pangolin = Pangolin({ weight: "400", subsets: ["latin"], display: "swap" });
+const pangolin = Pangolin({
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+});
 
 export default function Loader() {
   return (
@@ -18,7 +22,11 @@ export default function Loader() {
         FocusUp{" "}
         <motion.span
           animate={{ scale: [1, 1.2, 1] }}
-          transition={{ duration: 1.5, repeat: Infinity, repeatType: "reverse" }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            repeatType: "reverse",
+          }}
           className="text-[#F96F5D] inline-block"
         >
           !

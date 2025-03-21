@@ -9,10 +9,13 @@ import Navbar from "@/components/Navbar";
 import Loader from "@/components/ui/loader";
 import { useEffect, useState } from "react";
 
-const pangolin = Pangolin({ weight: "400", subsets: ["latin"], display: "swap" });
+const pangolin = Pangolin({
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+});
 
 export default function LandingPage() {
-
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -39,7 +42,11 @@ export default function LandingPage() {
           <motion.span
             initial={false} // Prevents SSR hydration issues
             animate={{ scale: [1, 1.3, 1] }}
-            transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              repeatType: "reverse",
+            }}
             className="text-[#F96F5D] inline-block"
           >
             !
@@ -52,14 +59,21 @@ export default function LandingPage() {
           animate="visible"
           variants={{
             hidden: { opacity: 0, y: 20 },
-            visible: { opacity: 1, y: 0, transition: { staggerChildren: 0.2, delayChildren: 0.5 } },
+            visible: {
+              opacity: 1,
+              y: 0,
+              transition: { staggerChildren: 0.2, delayChildren: 0.5 },
+            },
           }}
           className="mt-4 flex flex-col sm:flex-row gap-3 sm:gap-6 w-full sm:w-auto items-center"
         >
           {/* Get Started Button */}
           <Link href="/register">
             <motion.div
-              variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0 },
+              }}
               whileHover={{ scale: 1.08 }}
               transition={{ type: "spring", stiffness: 300 }}
               className="w-full max-w-xs sm:w-auto"
@@ -73,7 +87,10 @@ export default function LandingPage() {
           {/* Sign In Button */}
           <Link href="/signin">
             <motion.div
-              variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0 },
+              }}
               whileHover={{ scale: 1.08 }}
               transition={{ type: "spring", stiffness: 300 }}
               className="w-full max-w-xs sm:w-auto"
@@ -86,15 +103,19 @@ export default function LandingPage() {
         </motion.div>
       </div>
 
-{/* Footer */}
-<div className="h-16 w-full dark:bg-[#FBF2C0] bg-[#4a3628] dark:text-[#4A3628] text-[#FAF3DD] flex flex-col sm:flex-row items-center justify-center sm:justify-between px-3 sm:px-6 text-xs sm:text-sm">
-  <p className="text-center">© 2025 FocusUp. All rights reserved.</p>
-  <div className="flex gap-3 sm:gap-4 mt-1 sm:mt-0">
-    <Link href="https://x.com/iPratikkk___" target="_blank" className="hover:scale-110 transition-transform">
-      <FaTwitter className="dark:text-[#4A3628] text-[#FAF3DD] w-5 h-5 sm:w-6 sm:h-6" />
-    </Link>
-  </div>
-</div>
+      {/* Footer */}
+      <div className="h-16 w-full dark:bg-[#FBF2C0] bg-[#4a3628] dark:text-[#4A3628] text-[#FAF3DD] flex flex-col sm:flex-row items-center justify-center sm:justify-between px-3 sm:px-6 text-xs sm:text-sm">
+        <p className="text-center">© 2025 FocusUp. All rights reserved.</p>
+        <div className="flex gap-3 sm:gap-4 mt-1 sm:mt-0">
+          <Link
+            href="https://x.com/iPratikkk___"
+            target="_blank"
+            className="hover:scale-110 transition-transform"
+          >
+            <FaTwitter className="dark:text-[#4A3628] text-[#FAF3DD] w-5 h-5 sm:w-6 sm:h-6" />
+          </Link>
+        </div>
+      </div>
     </main>
   );
 }

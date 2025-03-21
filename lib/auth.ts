@@ -46,7 +46,10 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid email or password.");
         }
 
-        const isValidPassword = await bcrypt.compare(credentials.password, user.password);
+        const isValidPassword = await bcrypt.compare(
+          credentials.password,
+          user.password,
+        );
         if (!isValidPassword) {
           throw new Error("Invalid email or password.");
         }
@@ -64,22 +67,22 @@ export const authOptions: NextAuthOptions = {
         token.name = user.name;
         token.image = user.image;
       }
-    
+
       // Fetch the latest user data from the database for updates
       const dbUser = await prisma.user.findUnique({
         where: { id: token.id as string },
         select: { name: true, email: true, image: true },
       });
-    
+
       if (dbUser) {
         token.name = dbUser.name;
         token.email = dbUser.email;
         token.image = dbUser.image;
       }
-    
+
       return token;
     },
-    
+
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
@@ -87,9 +90,9 @@ export const authOptions: NextAuthOptions = {
         session.user.name = token.name as string;
         session.user.image = token.image as string | null | undefined;
       }
-    
+
       return session;
-    }      
+    },
   },
   pages: {
     signIn: "/signin",

@@ -23,13 +23,8 @@ export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const {
-    isExpanded,
-    isMobile,
-    setMobile,
-    setHovered,
-    reset
-  } = useSidebarStore();
+  const { isExpanded, isMobile, setMobile, setHovered, reset } =
+    useSidebarStore();
 
   const [userName, setUserName] = useState("User");
   const [userImage, setUserImage] = useState("/avatar-placeholder.png");
@@ -81,32 +76,38 @@ export default function Sidebar() {
   }, [isMobile, setHovered]);
 
   // Simplified item click handler
-  const handleItemClick = useCallback((path: string) => {    
-    if (isMobile) {
-      // Only collapse on mobile after navigation
-      setTimeout(() => {
-        setHovered(false);
-      }, 300);
-    }
-    
-    router.push(path);
-  }, [isMobile, router, setHovered]);
+  const handleItemClick = useCallback(
+    (path: string) => {
+      if (isMobile) {
+        // Only collapse on mobile after navigation
+        setTimeout(() => {
+          setHovered(false);
+        }, 300);
+      }
 
-  const handleClickWithPrevent = useCallback((e: React.MouseEvent, path: string) => {
-    e.preventDefault();
-    handleItemClick(path);
-  }, [handleItemClick]);
+      router.push(path);
+    },
+    [isMobile, router, setHovered],
+  );
+
+  const handleClickWithPrevent = useCallback(
+    (e: React.MouseEvent, path: string) => {
+      e.preventDefault();
+      handleItemClick(path);
+    },
+    [handleItemClick],
+  );
 
   return (
     <motion.div
       initial={{ width: 85 }}
-      animate={{ 
+      animate={{
         width: isExpanded ? 240 : 85,
-        transition: { 
-          duration: 0.3, 
+        transition: {
+          duration: 0.3,
           ease: "easeInOut",
-          type: "tween"
-        }
+          type: "tween",
+        },
       }}
       className="h-screen border-r border-[#4A3628] dark:border-[#FAF3DD] bg-[#FBF2C0] text-[#4A3628] dark:bg-[#4A3628] dark:text-[#FAF3DD]
                  p-4 flex flex-col fixed left-0 top-0 z-50 overflow-hidden"

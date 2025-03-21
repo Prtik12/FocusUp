@@ -13,7 +13,7 @@ export async function POST(req: Request) {
       console.error("JSON Parsing Error:", error);
       return NextResponse.json(
         { message: "Invalid JSON format" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     if (!name || !email || !password) {
       return NextResponse.json(
         { message: "All fields are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -39,7 +39,7 @@ export async function POST(req: Request) {
       if (existingUser) {
         return NextResponse.json(
           { message: "Email already registered" },
-          { status: 409 }
+          { status: 409 },
         );
       }
 
@@ -58,20 +58,20 @@ export async function POST(req: Request) {
 
       return NextResponse.json(
         { message: "User registered successfully", user: newUser },
-        { status: 201 }
+        { status: 201 },
       );
     } catch (dbError) {
       console.error("Database Error:", dbError);
       return NextResponse.json(
         { message: "Database error. Please try again later." },
-        { status: 500 }
+        { status: 500 },
       );
     }
   } catch (error) {
     console.error("Unexpected Server Error:", error);
     return NextResponse.json(
       { message: "Something went wrong" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

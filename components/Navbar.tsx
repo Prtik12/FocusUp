@@ -7,7 +7,11 @@ import { Pangolin } from "next/font/google";
 import { FiGithub, FiSun, FiMoon } from "react-icons/fi";
 import { useTheme } from "@/providers/ThemeProviders";
 
-const pangolin = Pangolin({ weight: "400", subsets: ["latin"], display: "swap" });
+const pangolin = Pangolin({
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+});
 
 export default function Navbar() {
   const { theme, toggleTheme } = useTheme();
@@ -20,7 +24,9 @@ export default function Navbar() {
   return (
     <nav
       className={`fixed top-0 left-0 w-full shadow-md z-50 ${
-        clientTheme === "dark" ? "bg-[#4a3628] text-[#FAF3DD]" : "bg-[#FBF2C0] text-[#4A3628]"
+        clientTheme === "dark"
+          ? "bg-[#4a3628] text-[#FAF3DD]"
+          : "bg-[#FBF2C0] text-[#4A3628]"
       }`}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">

@@ -16,7 +16,7 @@ const signUpSchema = z.object({
     .min(8, "Password must be at least 8 characters")
     .regex(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-      "Password must contain at least one uppercase letter, one lowercase letter, and one number"
+      "Password must contain at least one uppercase letter, one lowercase letter, and one number",
     ),
 });
 
@@ -91,7 +91,9 @@ export function SignUpForm() {
 
       router.push("/home");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Something went wrong");
+      toast.error(
+        error instanceof Error ? error.message : "Something went wrong",
+      );
     } finally {
       setLoading(false);
     }
@@ -109,7 +111,9 @@ export function SignUpForm() {
             required
             className={`w-full text-[#FAF3DD] ${errors.name ? "border-red-500" : ""}`}
           />
-          {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name}</p>}
+          {errors.name && (
+            <p className="text-sm text-red-500 mt-1">{errors.name}</p>
+          )}
         </div>
         <div>
           <Input
@@ -119,7 +123,9 @@ export function SignUpForm() {
             required
             className={`w-full text-[#FAF3DD] ${errors.email ? "border-red-500" : ""}`}
           />
-          {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
+          {errors.email && (
+            <p className="text-sm text-red-500 mt-1">{errors.email}</p>
+          )}
         </div>
         <div>
           <Input
@@ -129,9 +135,12 @@ export function SignUpForm() {
             required
             className={`w-full text-[#FAF3DD] ${errors.password ? "border-red-500" : ""}`}
           />
-          {errors.password && <p className="text-sm text-red-500 mt-1">{errors.password}</p>}
+          {errors.password && (
+            <p className="text-sm text-red-500 mt-1">{errors.password}</p>
+          )}
           <p className="text-xs text-[#FBF2C0] mt-1">
-            Password must be at least 8 characters and contain uppercase, lowercase, and numbers
+            Password must be at least 8 characters and contain uppercase,
+            lowercase, and numbers
           </p>
         </div>
         <Button

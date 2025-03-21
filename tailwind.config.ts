@@ -19,4 +19,4 @@ const config: Config = {
   plugins: [animate],
 };
 
-export default config; 
+export default config;

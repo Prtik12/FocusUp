@@ -17,13 +17,17 @@ import { useActivityData } from "@/hooks/useActivityData";
 import { useEventStore } from "@/store/eventStore";
 import { useSidebarStore } from "@/store/sidebarStore";
 
-const pangolin = Pangolin({ weight: "400", subsets: ["latin"], display: "swap" });
+const pangolin = Pangolin({
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+});
 
 export default function Home() {
   const { data: session } = useSession();
   const userName = session?.user?.name ?? "User";
   const eventListRef = useRef<HTMLDivElement>(null);
-  
+
   const { isTracking } = useActivityTracker();
   const { activityData, isLoading, streak } = useActivityData();
   const { isMobile } = useSidebarStore();
@@ -40,7 +44,7 @@ export default function Home() {
     updateModalPosition,
     fetchEvents,
     createEvent,
-    removeEvent
+    removeEvent,
   } = useEventStore();
 
   const updateModalPositionCallback = useCallback(() => {
@@ -55,7 +59,10 @@ export default function Home() {
   }, [fetchEvents]);
 
   const filteredEvents = selectedDate
-    ? events.filter((event) => new Date(event.date).toDateString() === selectedDate.toDateString())
+    ? events.filter(
+        (event) =>
+          new Date(event.date).toDateString() === selectedDate.toDateString(),
+      )
     : [];
 
   const handleAddEvent = () => {
@@ -64,7 +71,9 @@ export default function Home() {
   };
 
   return (
-    <div className={`${pangolin.className} bg-[#FBF2C0] dark:bg-[#4A3628] min-h-screen`}>
+    <div
+      className={`${pangolin.className} bg-[#FBF2C0] dark:bg-[#4A3628] min-h-screen`}
+    >
       <div className="hidden md:block">
         <Sidebar />
       </div>
@@ -78,7 +87,11 @@ export default function Home() {
           <header className="mb-8">
             <h1 className="text-4xl font-semibold text-[#4A3628] dark:text-[#FAF3DD]">
               Welcome, {userName}!
-              {isTracking && <span className="text-sm ml-2 opacity-70">(Tracking activity)</span>}
+              {isTracking && (
+                <span className="text-xs md:text-sm ml-2 opacity-70">
+                  (Tracking activity)
+                </span>
+              )}
             </h1>
           </header>
 
@@ -123,7 +136,9 @@ export default function Home() {
                         }
                       }}
                       events={events}
-                      eventListRef={eventListRef as React.RefObject<HTMLDivElement>}
+                      eventListRef={
+                        eventListRef as React.RefObject<HTMLDivElement>
+                      }
                       disableOutsideClickReset={false}
                     />
                   </div>
@@ -171,21 +186,34 @@ export default function Home() {
               </button>
 
               <h3 className="text-xl font-semibold text-[#4A3628] dark:text-[#FAF3DD] mb-1">
-                Events on {selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                Events on{" "}
+                {selectedDate.toLocaleDateString("en-US", {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                })}
               </h3>
 
               {filteredEvents.length > 0 ? (
                 <div className="space-y-2 mt-4 mb-5">
                   {filteredEvents.map((event) => (
-                    <EventCard key={event.id} event={event} deleteEvent={removeEvent} />
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      deleteEvent={removeEvent}
+                    />
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500 dark:text-gray-400 my-4 text-center">No events for this date.</p>
+                <p className="text-gray-500 dark:text-gray-400 my-4 text-center">
+                  No events for this date.
+                </p>
               )}
 
               <div className="mt-5">
-                <h4 className="text-sm font-medium text-[#4A3628] dark:text-[#FAF3DD] mb-2">Add New Event</h4>
+                <h4 className="text-sm font-medium text-[#4A3628] dark:text-[#FAF3DD] mb-2">
+                  Add New Event
+                </h4>
                 <input
                   type="text"
                   value={newEventTitle}
@@ -193,7 +221,7 @@ export default function Home() {
                   placeholder="Event title"
                   className="border p-3 w-full rounded-md bg-white/80 dark:bg-[#4A3628]/80 text-[#4A3628] dark:text-[#FAF3DD] dark:border-[#5A4532] placeholder-gray-400 dark:placeholder-gray-500 backdrop-blur-sm"
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
+                    if (e.key === "Enter") {
                       e.preventDefault();
                       handleAddEvent();
                     }

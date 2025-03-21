@@ -111,7 +111,9 @@ export function SignInForm() {
           required
           className={`w-full text-[#FAF3DD] ${errors.email ? "border-red-500" : ""}`}
         />
-        {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
+        {errors.email && (
+          <p className="text-sm text-red-500 mt-1">{errors.email}</p>
+        )}
       </div>
       <div>
         <Input
@@ -121,7 +123,9 @@ export function SignInForm() {
           required
           className={`w-full text-[#FAF3DD] ${errors.password ? "border-red-500" : ""}`}
         />
-        {errors.password && <p className="text-sm text-red-500 mt-1">{errors.password}</p>}
+        {errors.password && (
+          <p className="text-sm text-red-500 mt-1">{errors.password}</p>
+        )}
       </div>
       <Button
         type="submit"

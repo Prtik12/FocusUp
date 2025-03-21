@@ -8,7 +8,11 @@ import { useSession } from "next-auth/react";
 import React from "react";
 import { Pangolin } from "next/font/google";
 
-const pangolin = Pangolin({ weight: "400", subsets: ["latin"], display: "swap" });
+const pangolin = Pangolin({
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+});
 
 interface Note {
   id: string;
@@ -72,7 +76,9 @@ export default function NotesPage() {
   const deleteNote = async (noteId: string) => {
     if (!userId) return;
 
-    const confirmed = window.confirm("Are you sure you want to delete this note?");
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this note?",
+    );
     if (!confirmed) return;
 
     setLoadingNoteId(noteId);
@@ -94,7 +100,9 @@ export default function NotesPage() {
   const deleteAllNotes = async () => {
     if (!userId) return;
 
-    const confirmed = window.confirm("Are you sure you want to delete all notes?");
+    const confirmed = window.confirm(
+      "Are you sure you want to delete all notes?",
+    );
     if (!confirmed) return;
 
     setLoadingDeleteAll(true);
@@ -121,7 +129,9 @@ export default function NotesPage() {
       </div>
 
       <div className="flex flex-col items-center justify-center flex-1 bg-[#FBF2C0] dark:bg-[#4A3628] p-6 relative">
-        <h2 className="text-3xl font-bold text-[#4A3628] dark:text-[#FAF3DD] mb-6">Notes</h2>
+        <h2 className="text-3xl font-bold text-[#4A3628] dark:text-[#FAF3DD] mb-6">
+          Notes
+        </h2>
 
         {/* Note Input */}
         <div className="bg-[#FAF3DD] dark:bg-[#3A2B22] shadow-md rounded-lg p-4 w-full max-w-2xl">
@@ -186,51 +196,48 @@ export default function NotesPage() {
         </div>
       </div>
 
-{/* Modal for Selected Note */}
-<AnimatePresence>
-  {selectedNote && (
-    <motion.div
-      className="fixed inset-0 flex items-center justify-center bg-white/10 dark:bg-black/10 backdrop-blur-lg z-50"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      onClick={() => setSelectedNote(null)}
-    >
-      <motion.div
-        className="bg-[#FAF3DD] dark:bg-[#3A2B22] p-6 rounded-lg shadow-lg max-w-lg w-full relative"
-        initial={{ scale: 0.8 }}
-        animate={{ scale: 1 }}
-        exit={{ scale: 0.8 }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h3 className="text-2xl font-bold text-[#4A3628] dark:text-[#FAF3DD] mb-2">
-          {selectedNote.title}
-        </h3>
-        <p className="text-[#4A3628] dark:text-[#FAF3DD] mb-4 whitespace-pre-wrap">
-          {selectedNote.content}
-        </p>
-        
-        {/* Display Date & Time */}
-        <p className="text-sm text-[#4A3628]/60 dark:text-[#FAF3DD]/60 italic">
-          {new Date(selectedNote.createdAt).toLocaleString()}
-        </p>
+      {/* Modal for Selected Note */}
+      <AnimatePresence>
+        {selectedNote && (
+          <motion.div
+            className="fixed inset-0 flex items-center justify-center bg-white/10 dark:bg-black/10 backdrop-blur-lg z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedNote(null)}
+          >
+            <motion.div
+              className="bg-[#FAF3DD] dark:bg-[#3A2B22] p-6 rounded-lg shadow-lg max-w-lg w-full relative"
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.8 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-2xl font-bold text-[#4A3628] dark:text-[#FAF3DD] mb-2">
+                {selectedNote.title}
+              </h3>
+              <p className="text-[#4A3628] dark:text-[#FAF3DD] mb-4 whitespace-pre-wrap">
+                {selectedNote.content}
+              </p>
 
-        <button
-          className="absolute top-2 right-2 text-[#D9534F] font-bold hover:text-[#C64440] custom-cursor"
-          onClick={(e) => {
-            e.preventDefault();
-            setSelectedNote(null);
-          }}
-        >
-          ✕
-        </button>
-      </motion.div>
-    </motion.div>
-  )}
-</AnimatePresence>
+              {/* Display Date & Time */}
+              <p className="text-sm text-[#4A3628]/60 dark:text-[#FAF3DD]/60 italic">
+                {new Date(selectedNote.createdAt).toLocaleString()}
+              </p>
 
-
-
+              <button
+                className="absolute top-2 right-2 text-[#D9534F] font-bold hover:text-[#C64440] custom-cursor"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setSelectedNote(null);
+                }}
+              >
+                ✕
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
