@@ -30,7 +30,7 @@ export const useActivityTracker = () => {
                       String(today.getMonth() + 1).padStart(2, '0') + '-' + 
                       String(today.getDate()).padStart(2, '0');
                       
-      console.log(`Loading activity for today: ${todayStr}`);
+      console.log(`Loading activity for today: ${todayStr} (Local time: ${today.toLocaleString()})`);
       
       const storedActivities = localStorage.getItem('userActivities');
       
@@ -45,6 +45,20 @@ export const useActivityTracker = () => {
           console.log('No existing activity found for today');
         }
       }
+    };
+
+    // Safe date comparison function that handles timezones correctly
+    const compareDates = (dateA: string, dateB: string) => {
+      // Parse dates using components to ensure timezone consistency
+      const [yearA, monthA, dayA] = dateA.split('-').map(Number);
+      const [yearB, monthB, dayB] = dateB.split('-').map(Number);
+      
+      // Compare year first
+      if (yearA !== yearB) return yearB - yearA;
+      // Then month
+      if (monthA !== monthB) return monthB - monthA;
+      // Then day
+      return dayB - dayA;
     };
 
     // Save activity data to localStorage
@@ -79,7 +93,7 @@ export const useActivityTracker = () => {
       // Find if today already has an entry
       const todayIndex = activities.findIndex(a => a.date === todayStr);
       
-      console.log(`Saving activity for ${todayStr}: ${minutesActive} minutes`);
+      console.log(`Saving activity for ${todayStr} (Local time: ${today.toLocaleString()}): ${minutesActive} minutes`);
       
       if (todayIndex >= 0) {
         // Update existing entry
@@ -99,7 +113,7 @@ export const useActivityTracker = () => {
       
       // Keep only the last 14 days of activity
       activities = activities
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .sort((a, b) => compareDates(a.date, b.date))
         .slice(0, 14);
       
       // Save to localStorage

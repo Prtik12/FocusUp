@@ -23,10 +23,35 @@ export const useActivityData = () => {
   
   // Format a date for display (e.g., "Mar 22")
   const formatDateForDisplay = (dateString: string) => {
-    const date = new Date(dateString);
-    const month = date.toLocaleString('default', { month: 'short' });
-    const day = date.getDate();
-    return `${month} ${day}`;
+    // Parse the date string safely using components to avoid timezone issues
+    const [year, month, day] = dateString.split('-').map(Number);
+    // Create a date using local timezone components
+    const date = new Date(year, month - 1, day); // month is 0-indexed in Date constructor
+    const monthName = date.toLocaleString('default', { month: 'short' });
+    return `${monthName} ${day}`;
+  };
+
+  // Safe function to calculate date by subtracting days
+  const getDateMinusDays = (daysToSubtract: number) => {
+    const date = new Date();
+    date.setDate(date.getDate() - daysToSubtract);
+    return date.getFullYear() + '-' + 
+           String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+           String(date.getDate()).padStart(2, '0');
+  };
+
+  // Safe date comparison function that handles timezones correctly
+  const compareDates = (dateA: string, dateB: string) => {
+    // Parse dates using components to ensure timezone consistency
+    const [yearA, monthA, dayA] = dateA.split('-').map(Number);
+    const [yearB, monthB, dayB] = dateB.split('-').map(Number);
+    
+    // Compare year first
+    if (yearA !== yearB) return yearB - yearA;
+    // Then month
+    if (monthA !== monthB) return monthB - monthA;
+    // Then day
+    return dayB - dayA;
   };
 
   // Extract the loadActivityData logic to a callback so we can use it in multiple places
@@ -44,7 +69,7 @@ export const useActivityData = () => {
     // Log current time for debugging
     const now = new Date();
     const todayStr = getTodayDateString();
-    console.log(`Loading activity data at: ${now.toISOString()} (${now.toString()})`);
+    console.log(`Loading activity data at: ${now.toLocaleString()} (Local timezone)`);
     console.log(`Current date in user's timezone: ${todayStr}`);
     
     // Create a complete array for the last 7 days
@@ -53,14 +78,7 @@ export const useActivityData = () => {
     // Fill with the last 7 days
     for (let i = 6; i >= 0; i--) {
       // Calculate date by subtracting days from today
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      
-      // Format as YYYY-MM-DD
-      const dateString = date.getFullYear() + '-' + 
-                        String(date.getMonth() + 1).padStart(2, '0') + '-' + 
-                        String(date.getDate()).padStart(2, '0');
-                        
+      const dateString = getDateMinusDays(i);
       const activity = activities.find(a => a.date === dateString);
       
       formattedActivities.push({
@@ -73,7 +91,7 @@ export const useActivityData = () => {
     // Calculate streak
     let currentStreak = 0;
     const sortedActivities = [...activities].sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      (a, b) => compareDates(a.date, b.date)
     );
     
     // Start from today and go backwards
@@ -85,9 +103,11 @@ export const useActivityData = () => {
       if (sortedActivities[i].date === checkDate && sortedActivities[i].minutesActive > 0) {
         currentStreak++;
         
-        // Set check date to the previous day (need to use our own date manipulation to stay consistent)
-        const prevDate = new Date(checkDate);
+        // Calculate the previous day's date
+        const [year, month, day] = checkDate.split('-').map(Number);
+        const prevDate = new Date(year, month - 1, day);
         prevDate.setDate(prevDate.getDate() - 1);
+        
         checkDate = prevDate.getFullYear() + '-' + 
                    String(prevDate.getMonth() + 1).padStart(2, '0') + '-' + 
                    String(prevDate.getDate()).padStart(2, '0');
@@ -120,7 +140,7 @@ export const useActivityData = () => {
     const currentDate = getTodayDateString();
     
     const dateChanged = lastRefreshDate !== currentDate;
-    console.log(`Date check: last=${lastRefreshDate}, current=${currentDate}, changed=${dateChanged}`);
+    console.log(`Date check: last=${lastRefreshDate} (${lastRefresh.toLocaleString()}), current=${currentDate}, changed=${dateChanged}`);
     
     return dateChanged;
   }, []);
@@ -134,7 +154,7 @@ export const useActivityData = () => {
     tomorrow.setHours(0, 0, 0, 0);
     
     const timeUntilMidnight = tomorrow.getTime() - now.getTime();
-    console.log(`Scheduled refresh at midnight in ${timeUntilMidnight}ms (${tomorrow.toString()})`);
+    console.log(`Scheduled refresh at midnight in ${timeUntilMidnight}ms (${tomorrow.toLocaleString()} local time)`);
     
     // Set a timeout to refresh at midnight
     const midnightTimeout = setTimeout(() => {
