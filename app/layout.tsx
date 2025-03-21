@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Pangolin } from "next/font/google";
 import { AuthProvider } from "@/providers/NextAuthProviders";
 import { ThemeProvider } from "@/providers/ThemeProviders";
+import { Analytics } from "@vercel/analytics/react"
 import "./globals.css";
 
 const geistSans = Geist({
@@ -56,7 +57,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} ${pangolin.variable} font-pangolin`}>
         <AuthProvider>
-          <ThemeProvider>{children}</ThemeProvider>
+          <ThemeProvider>{children}<Analytics /></ThemeProvider>
         </AuthProvider>
       </body>
     </html>
