@@ -34,7 +34,7 @@ const sidebarItems: SidebarItem[] = [
 ];
 
 const Sidebar: React.FC = () => {
-  const { isExpanded, collapse, setNavigating, setHovered, isMobile } = useSidebarStore();
+  const { isExpanded, setHovered, isMobile } = useSidebarStore();
   const router = useRouter();
 
   const handleMouseEnter = () => {
@@ -51,11 +51,11 @@ const Sidebar: React.FC = () => {
 
   const handleItemClick = async (href: string) => {
     if (isMobile) {
-      collapse();
+      setTimeout(() => {
+        setHovered(false);
+      }, 300);
     }
-    setNavigating(true);
     router.push(href);
-    setNavigating(false);
   };
 
   return (
