@@ -25,23 +25,19 @@ export async function PUT(req: Request) {
     if (image) updateData.image = image;
 
     // 5️⃣ Update user in DB
-    await prisma.user.update({
+    const updatedUser = await prisma.user.update({
       where: { email: session.user.email },
       data: updateData,
     });
 
-    // 6️⃣ Fetch the updated user
-    const updatedUser = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: { id: true, name: true, email: true, image: true },
-    });
-
-    console.log("Updated User:", updatedUser);
-
-    // 7️⃣ Return updated session data
+    // 6️⃣ Return updated session data
     return NextResponse.json({
       message: "Profile updated successfully",
-      user: updatedUser, // Pass updated user data
+      user: {
+        id: updatedUser.id,
+        name: updatedUser.name,
+        email: updatedUser.email
+      }
     });
   } catch (error) {
     console.error("Profile update error:", error);

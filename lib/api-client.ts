@@ -32,7 +32,6 @@ export const apiClient = {
   },
 
   async deleteStudyPlan(planId: string, userId: string) {
-    console.log("Sending DELETE request for plan ID:", planId);
     const response = await fetch(`${API_BASE_URL}/generate-study-plan`, {
       method: 'DELETE',
       headers: {

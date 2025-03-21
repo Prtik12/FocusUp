@@ -57,8 +57,6 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async jwt({ token, user }) {
-      console.log("🔵 JWT Callback - Before:", token);
-    
       // If a user just signed in, store the user details in the token
       if (user) {
         token.id = user.id;
@@ -79,13 +77,10 @@ export const authOptions: NextAuthOptions = {
         token.image = dbUser.image;
       }
     
-      console.log("🟢 JWT Callback - After:", token);
       return token;
     },
     
     async session({ session, token }) {
-      console.log("🔥 Session Created - Before:", session);
-    
       if (session.user) {
         session.user.id = token.id as string;
         session.user.email = token.email as string;
@@ -93,7 +88,6 @@ export const authOptions: NextAuthOptions = {
         session.user.image = token.image as string | null | undefined;
       }
     
-      console.log("🟢 Session Callback - After:", session);
       return session;
     }      
   },

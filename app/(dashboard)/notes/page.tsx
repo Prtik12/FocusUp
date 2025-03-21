@@ -116,7 +116,9 @@ export default function NotesPage() {
   return (
     <div className={`flex min-h-screen ${pangolin.className}`}>
       {!isMobile && <Sidebar />}
-      {isMobile && <BottomBar />}
+      <div className="block md:hidden fixed bottom-0 w-full z-50">
+        {isMobile && <BottomBar />}
+      </div>
 
       <div className="flex flex-col items-center justify-center flex-1 bg-[#FBF2C0] dark:bg-[#4A3628] p-6 relative">
         <h2 className="text-3xl font-bold text-[#4A3628] dark:text-[#FAF3DD] mb-6">Notes</h2>

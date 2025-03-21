@@ -24,6 +24,27 @@ const pangolin = Pangolin({
 export const metadata: Metadata = {
   title: "FocusUp",
   description: "A productivity app to help you focus on your tasks.",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://focusup.vercel.app"),
+  openGraph: {
+    title: "FocusUp",
+    description: "A productivity app to help you focus on your tasks.",
+    images: [
+      {
+        url: "/banner.png",
+        width: 1200,
+        height: 630,
+        alt: "FocusUp App Banner"
+      }
+    ],
+    type: "website"
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FocusUp",
+    description: "A productivity app to help you focus on your tasks.",
+    images: ["/banner.png"],
+    creator: "@focusup"
+  }
 };
 
 export default function RootLayout({

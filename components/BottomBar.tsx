@@ -23,12 +23,12 @@ export default function BottomBar() {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 w-full bg-[#FBF2C0] dark:bg-[#4A3628] text-[#4A3628] dark:text-[#FAF3DD] shadow-lg p-2 flex justify-around items-center border-t border-[#4A3628] dark:border-[#FAF3DD]">
+    <div className="fixed bottom-0 left-0 w-full bg-[#FBF2C0] dark:bg-[#4A3628] text-[#4A3628] dark:text-[#FAF3DD] shadow-lg p-2 flex justify-around items-center border-t border-[#4A3628] dark:border-[#FAF3DD] z-50">
       {bottomBarItems.map(({ icon: Icon, label, path }) => (
         <button
           key={path}
           onClick={() => router.push(path)}
-          className={`flex flex-col items-center p-2 transition duration-300 ${
+          className={`flex flex-col items-center p-2 transition duration-300 custom-cursor ${
             pathname === path ? "text-[#F96F5D]" : "hover:text-[#F96F5D]"
           }`}
         >
@@ -38,19 +38,19 @@ export default function BottomBar() {
       ))}
 
       {/* Theme Toggle */}
-      <button onClick={toggleTheme} className="flex flex-col items-center p-2 hover:text-[#F96F5D]">
+      <button onClick={toggleTheme} className="flex flex-col items-center p-2 hover:text-[#F96F5D] custom-cursor">
         {theme === "dark" ? <FiSun size={24} /> : <FiMoon size={24} />}
         <span className="text-xs">Theme</span>
       </button>
 
       {/* Profile */}
-      <button onClick={() => router.push("/profile")} className="flex flex-col items-center p-2 hover:text-[#F96F5D]">
+      <button onClick={() => router.push("/profile")} className="flex flex-col items-center p-2 hover:text-[#F96F5D] custom-cursor">
         <FiUser size={24} />
         <span className="text-xs">Profile</span>
       </button>
 
       {/* Logout */}
-      <button onClick={handleSignOut} className="flex flex-col items-center p-2 hover:text-[#F96F5D]">
+      <button onClick={handleSignOut} className="flex flex-col items-center p-2 hover:text-[#F96F5D] custom-cursor">
         <FiLogOut size={24} />
         <span className="text-xs">Logout</span>
       </button>

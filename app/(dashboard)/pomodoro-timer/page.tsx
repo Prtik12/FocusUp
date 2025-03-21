@@ -7,6 +7,7 @@ import BottomBar from "@/components/BottomBar";
 import Sidebar from "@/components/Sidebar";
 import { useTimerStore } from "@/store/useTimerStore";
 import { Pangolin } from "next/font/google";
+import { toast } from "sonner";
 
 const pangolin = Pangolin({ weight: "400", subsets: ["latin"], display: "swap" });
 
@@ -14,6 +15,20 @@ const pangolin = Pangolin({ weight: "400", subsets: ["latin"], display: "swap" }
 const flipVariants = {
   initial: { rotateX: 0 },
   animate: { rotateX: [-90, 0], transition: { duration: 0.5 } },
+};
+
+// Banner animation
+const bannerVariants = {
+  focus: { 
+    backgroundColor: "#F96F5D", 
+    scale: [1, 1.03, 1],
+    transition: { duration: 0.5 }
+  },
+  rest: { 
+    backgroundColor: "#4CAF50", 
+    scale: [1, 1.03, 1],
+    transition: { duration: 0.5 }
+  },
 };
 
 const PomodoroTimer = () => {
@@ -31,7 +46,9 @@ const PomodoroTimer = () => {
 
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
   const chimeRef = useRef<HTMLAudioElement | null>(null);
-  const [allowChime, setAllowChime] = useState(false);
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | null>(null);
+  const [modeChanging, setModeChanging] = useState(false);
+  const [completedCycles, setCompletedCycles] = useState(0);
 
   // Handle window resizing
   useEffect(() => {
@@ -39,6 +56,19 @@ const PomodoroTimer = () => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Request notification permission
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      setNotificationPermission(Notification.permission);
+      
+      if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+        Notification.requestPermission().then(permission => {
+          setNotificationPermission(permission);
+        });
+      }
+    }
   }, []);
 
   // ⏳ Fix: Decrease timeLeft when timer is running
@@ -56,26 +86,64 @@ const PomodoroTimer = () => {
     return () => clearInterval(timer);
   }, [isRunning, timeLeft]);
 
-  // Play chime when timer hits 0
+  // Handle timer completion and mode switching
   useEffect(() => {
-    if (timeLeft === 0 && allowChime) {
+    if (timeLeft === 0 && !modeChanging) {
+      // Play chime sound
       if (chimeRef.current) {
         chimeRef.current.currentTime = 0;
         chimeRef.current.play().catch((err) => console.error("Chime failed to play:", err));
       }
 
+      // Set mode changing to prevent multiple switches
+      setModeChanging(true);
+      
+      // Update completed cycles counter (only when finishing a focus session)
+      if (isFocusMode) {
+        setCompletedCycles(prev => prev + 1);
+      }
+
+      // Determine next mode message
+      const currentMode = isFocusMode ? "Focus" : "Rest";
+      const nextMode = isFocusMode ? "Rest" : "Focus";
+      const message = `${currentMode} session completed! Time for ${nextMode} mode.`;
+      
+      // Show toast notification
+      toast.success(message, { duration: 5000 });
+
+      // Show browser notification
+      if (notificationPermission === 'granted') {
+        new Notification('Pomodoro Timer', { 
+          body: message,
+          icon: '/favicon.ico'
+        });
+      }
+
+      // Switch mode automatically after animation
       setTimeout(() => {
-        switchMode();
-        setAllowChime(false);
+        switchMode(); // This toggles between focus and rest modes
+        setModeChanging(false);
       }, 1000);
     }
-  }, [timeLeft, switchMode, allowChime]);
+  }, [timeLeft, isFocusMode, notificationPermission, switchMode, modeChanging]);
 
   const handleStartPause = () => {
-    if (!isRunning) {
-      setAllowChime(true);
+    if (!isRunning && timeLeft === 0) {
+      // If timer is at 0, switch mode first then start
+      switchMode();
     }
     startPauseTimer();
+  };
+
+  const handleRequestNotifications = () => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      Notification.requestPermission().then(permission => {
+        setNotificationPermission(permission);
+        if (permission === 'granted') {
+          toast.success('Notifications enabled for timer completion!');
+        }
+      });
+    }
   };
 
   if (isMobile === null) return null;
@@ -89,6 +157,13 @@ const PomodoroTimer = () => {
     .padStart(2, "0")
     .split("");
 
+  // Determine action button text based on timer state
+  const actionButtonText = isRunning 
+    ? "Pause" 
+    : timeLeft === 0 
+      ? `Start ${isFocusMode ? "Rest" : "Focus"}`
+      : "Start";
+
   return (
     <div
       className={`h-screen flex flex-col items-center justify-center ${pangolin.className} ${
@@ -96,7 +171,9 @@ const PomodoroTimer = () => {
       } bg-[#FBF2C0] dark:bg-[#4A3628]`}
     >
       {!isMobile && <Sidebar />}
-      {isMobile && <BottomBar />}
+      <div className="block md:hidden fixed bottom-0 w-full z-50">
+        {isMobile && <BottomBar />}
+      </div>
 
       <audio ref={chimeRef} src="/Chime.mp3" preload="auto" />
 
@@ -105,13 +182,21 @@ const PomodoroTimer = () => {
       </h1>
 
       <div className="bg-[#FAF3DD] dark:bg-[#2C2C2C] shadow-lg rounded-xl py-12 px-10 w-full max-w-lg flex flex-col items-center">
-        <div
-          className={`w-full text-center p-6 rounded-lg transition-all ${
-            isFocusMode ? "bg-[#F96F5D]" : "bg-[#4CAF50]"
-          } text-white dark:text-[#FAF3DD]`}
+        <motion.div
+          className="w-full text-center p-6 rounded-lg text-white dark:text-[#FAF3DD]"
+          animate={isFocusMode ? "focus" : "rest"}
+          variants={bannerVariants}
+          key={isFocusMode ? "focus" : "rest"} // Add key to force animation on mode change
         >
-          <h2 className="text-3xl font-semibold">{isFocusMode ? "Focus Mode 🧠" : "Rest Mode ☕"}</h2>
-        </div>
+          <h2 className="text-3xl font-semibold">
+            {isFocusMode ? "Focus Mode 🧠" : "Rest Mode ☕"}
+          </h2>
+          {completedCycles > 0 && (
+            <p className="text-sm mt-2 opacity-80">
+              {completedCycles} {completedCycles === 1 ? 'cycle' : 'cycles'} completed
+            </p>
+          )}
+        </motion.div>
 
         {/* Flip Clock Timer */}
         <div className="flex justify-center space-x-2 my-10">
@@ -147,13 +232,13 @@ const PomodoroTimer = () => {
         <div className="flex space-x-4 mb-6">
           <Button
             onClick={handleStartPause}
-            className="px-8 py-4 text-xl font-semibold rounded-full transition-all text-white bg-gradient-to-r from-[#F96F5D] to-[#FF4D4D] hover:scale-105 shadow-md"
+            className="px-8 py-4 text-xl font-semibold rounded-full transition-all text-white bg-gradient-to-r from-[#F96F5D] to-[#FF4D4D] hover:scale-105 shadow-md custom-cursor"
           >
-            {isRunning ? "Pause" : "Start"}
+            {actionButtonText}
           </Button>
           <Button
             onClick={resetTimer}
-            className="px-8 py-4 text-xl font-semibold rounded-full border-2 border-[#F96F5D] text-[#F96F5D] hover:bg-[#F96F5D] hover:text-white transition-all shadow-md"
+            className="px-8 py-4 text-xl font-semibold rounded-full border-2 border-[#F96F5D] text-[#F96F5D] hover:bg-[#F96F5D] hover:text-white transition-all shadow-md custom-cursor"
           >
             Reset
           </Button>
@@ -164,7 +249,7 @@ const PomodoroTimer = () => {
             <Button
               key={min}
               onClick={() => setFocusTime(min)}
-              className="px-5 py-3 rounded-lg border-2 border-[#F96F5D] text-[#F96F5D] hover:bg-[#F96F5D] hover:text-white transition-all shadow-sm"
+              className="px-5 py-3 rounded-lg border-2 border-[#F96F5D] text-[#F96F5D] hover:bg-[#F96F5D] hover:text-white transition-all shadow-sm custom-cursor"
             >
               {min} min
             </Button>
@@ -174,6 +259,15 @@ const PomodoroTimer = () => {
         <p className="mt-4 text-sm text-[#4A3628] dark:text-[#FAF3DD]">
           Focus Time: {focusTime / 60} min | Rest Time: {restTime / 60} min
         </p>
+
+        {notificationPermission !== 'granted' && (
+          <button 
+            onClick={handleRequestNotifications}
+            className="mt-4 text-sm text-[#F96F5D] underline hover:text-[#e85b4b] transition-colors custom-cursor"
+          >
+            Enable Notifications
+          </button>
+        )}
       </div>
     </div>
   );

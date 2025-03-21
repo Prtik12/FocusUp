@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -8,6 +8,7 @@ import { FiUser, FiHome, FiSun, FiMoon, FiLogOut } from "react-icons/fi";
 import { BsJournalBookmark, BsClock, BsSticky } from "react-icons/bs";
 import Image from "next/image";
 import { useTheme } from "@/providers/ThemeProviders";
+import { useSidebarStore } from "@/store/sidebarStore";
 
 const sidebarItems = [
   { icon: FiHome, label: "Home", path: "/home" },
@@ -22,12 +23,24 @@ export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const {
+    isExpanded,
+    isMobile,
+    setMobile,
+    setHovered,
+    reset
+  } = useSidebarStore();
+
   const [userName, setUserName] = useState("User");
   const [userImage, setUserImage] = useState("/avatar-placeholder.png");
 
-  // Update name & image when session changes
+  // Reset sidebar state on unmount
+  useEffect(() => {
+    return () => {
+      reset();
+    };
+  }, [reset]);
+
   useEffect(() => {
     if (session?.user) {
       setUserName(session.user.name || "User");
@@ -35,60 +48,88 @@ export default function Sidebar() {
     }
   }, [session?.user]);
 
-  // Ensure sidebar updates after profile change
-  // useEffect(() => {
-  //   update();
-  // }, [update]);
-
-  // Handle window resize
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setIsMobile(window.innerWidth < 768);
-      const handleResize = () => setIsMobile(window.innerWidth < 768);
+      const handleResize = () => setMobile(window.innerWidth < 768);
+      handleResize();
       window.addEventListener("resize", handleResize);
       return () => window.removeEventListener("resize", handleResize);
     }
-  }, []);
+  }, [setMobile]);
 
-  // Redirect to sign-in if session is null
   useEffect(() => {
     if (status !== "loading" && !session) {
       router.push("/signin");
     }
   }, [session, status, router]);
 
-  // Sign out function
   const handleSignOut = async () => {
     await signOut({ redirect: true, callbackUrl: "/signin" });
   };
 
+  // Simplified mouse handlers
+  const handleMouseEnter = useCallback(() => {
+    if (!isMobile) {
+      setHovered(true);
+    }
+  }, [isMobile, setHovered]);
+
+  const handleMouseLeave = useCallback(() => {
+    if (!isMobile) {
+      setHovered(false);
+    }
+  }, [isMobile, setHovered]);
+
+  // Simplified item click handler
+  const handleItemClick = useCallback((path: string) => {    
+    if (isMobile) {
+      // Only collapse on mobile after navigation
+      setTimeout(() => {
+        setHovered(false);
+      }, 300);
+    }
+    
+    router.push(path);
+  }, [isMobile, router, setHovered]);
+
   return (
     <motion.div
       initial={{ width: 85 }}
-      animate={{ width: isExpanded ? 240 : 85 }}
-      transition={{ duration: 0.3, ease: "easeInOut" }}
+      animate={{ 
+        width: isExpanded ? 240 : 85,
+        transition: { 
+          duration: 0.3, 
+          ease: "easeInOut",
+          type: "tween"
+        }
+      }}
       className="h-screen border-r border-[#4A3628] dark:border-[#FAF3DD] bg-[#FBF2C0] text-[#4A3628] dark:bg-[#4A3628] dark:text-[#FAF3DD]
-                 p-4 flex flex-col fixed left-0 top-0 z-50"
-      onMouseEnter={() => !isMobile && setIsExpanded(true)}
-      onMouseLeave={() => !isMobile && setIsExpanded(false)}
+                 p-4 flex flex-col fixed left-0 top-0 z-50 overflow-hidden"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onTouchStart={() => isMobile && setHovered(true)}
+      onTouchEnd={() => isMobile && setHovered(false)}
     >
       {/* Profile Section */}
-      <div className="flex items-center w-full mb-5">
-      <Image
-  src={userImage}
-  alt="Profile"
-  width={48}
-  height={48}
-  className="rounded-full object-cover w-12 h-12"
-/>
+      <div className="flex items-center w-full mb-5 min-w-[240px]">
+        <div className="shrink-0">
+          <Image
+            src={userImage || "/avatar-placeholder.png"}
+            alt="Profile"
+            width={48}
+            height={48}
+            className="rounded-full object-cover w-12 h-12"
+            priority
+          />
+        </div>
 
-        <AnimatePresence>
+        <AnimatePresence mode="wait">
           {isExpanded && (
             <motion.span
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -10 }}
-              transition={{ duration: 0.2, delay: 0.1 }}
+              transition={{ duration: 0.2 }}
               className="text-lg font-semibold ml-3 whitespace-nowrap overflow-hidden text-ellipsis"
             >
               {userName}
@@ -99,18 +140,20 @@ export default function Sidebar() {
 
       {/* Edit Profile */}
       <div
-        onClick={() => router.push("/profile")}
+        onClick={() => handleItemClick("/profile")}
         className="w-full flex items-center p-3 mb-5 rounded-lg transition duration-300 
-                  hover:bg-[#E2C799] dark:hover:bg-[#5A4532] custom-cursor"
+                  hover:bg-[#E2C799] dark:hover:bg-[#5A4532] custom-cursor min-w-[240px]"
       >
-        <FiUser size={28} className="shrink-0" />
-        <AnimatePresence>
+        <div className="shrink-0">
+          <FiUser size={28} />
+        </div>
+        <AnimatePresence mode="wait">
           {isExpanded && (
             <motion.span
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -10 }}
-              transition={{ duration: 0.2, delay: 0.1 }}
+              transition={{ duration: 0.2 }}
               className="text-md ml-3 whitespace-nowrap"
             >
               Edit Profile
@@ -124,22 +167,24 @@ export default function Sidebar() {
         {sidebarItems.map(({ icon: Icon, label, path }) => (
           <div
             key={path}
-            onClick={() => router.push(path)}
-            className={`flex items-center p-3 rounded-lg transition duration-300 custom-cursor 
+            onClick={() => handleItemClick(path)}
+            className={`flex items-center p-3 rounded-lg transition duration-300 custom-cursor min-w-[240px]
                        ${
                          pathname === path
                            ? "bg-[#F96F5D] text-white"
                            : "hover:bg-[#E2C799] dark:hover:bg-[#5A4532] text-[#4A3628] dark:text-[#FAF3DD]"
                        }`}
           >
-            <Icon size={28} className="shrink-0" />
-            <AnimatePresence>
+            <div className="shrink-0">
+              <Icon size={28} />
+            </div>
+            <AnimatePresence mode="wait">
               {isExpanded && (
                 <motion.span
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -10 }}
-                  transition={{ duration: 0.2, delay: 0.1 }}
+                  transition={{ duration: 0.2 }}
                   className="text-md ml-3 whitespace-nowrap"
                 >
                   {label}
@@ -154,18 +199,20 @@ export default function Sidebar() {
       <div className="mt-auto w-full space-y-2">
         {/* Theme Toggle */}
         <div
-          className="w-full flex items-center p-3 rounded-lg transition duration-300 cursor-pointer
+          className="w-full flex items-center p-3 rounded-lg transition duration-300 cursor-pointer custom-cursor min-w-[240px]
                     hover:bg-[#E2C799] dark:hover:bg-[#5A4532]"
           onClick={toggleTheme}
         >
-          {theme === "dark" ? <FiSun size={28} /> : <FiMoon size={28} />}
-          <AnimatePresence>
+          <div className="shrink-0">
+            {theme === "dark" ? <FiSun size={28} /> : <FiMoon size={28} />}
+          </div>
+          <AnimatePresence mode="wait">
             {isExpanded && (
               <motion.span
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -10 }}
-                transition={{ duration: 0.2, delay: 0.1 }}
+                transition={{ duration: 0.2 }}
                 className="text-md ml-3 whitespace-nowrap"
               >
                 {theme === "dark" ? "Light Mode" : "Dark Mode"}
@@ -176,18 +223,20 @@ export default function Sidebar() {
 
         {/* Sign Out */}
         <div
-          className="w-full flex items-center p-3 rounded-lg transition duration-300 cursor-pointer
+          className="w-full flex items-center p-3 rounded-lg transition duration-300 cursor-pointer custom-cursor min-w-[240px]
                     hover:bg-[#E2C799] dark:hover:bg-[#5A4532]"
           onClick={handleSignOut}
         >
-          <FiLogOut size={28} className="shrink-0" />
-          <AnimatePresence>
+          <div className="shrink-0">
+            <FiLogOut size={28} />
+          </div>
+          <AnimatePresence mode="wait">
             {isExpanded && (
               <motion.span
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -10 }}
-                transition={{ duration: 0.2, delay: 0.1 }}
+                transition={{ duration: 0.2 }}
                 className="text-md ml-3 whitespace-nowrap"
               >
                 Sign Out
