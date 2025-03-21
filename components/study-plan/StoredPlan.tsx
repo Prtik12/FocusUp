@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { StudyPlan } from '@/types/studyPlan';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
-import { Trash2, X as CloseIcon } from 'lucide-react';
+import { Trash2, X as CloseIcon, AlertTriangle } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface StoredPlanProps {
   plan: StudyPlan;
@@ -13,6 +15,22 @@ interface StoredPlanProps {
 export default function StoredPlan({ plan, onDelete, deleteInProgress }: StoredPlanProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [contentError, setContentError] = useState<string | null>(null);
+  const [isContentReady, setIsContentReady] = useState(false);
+
+  useEffect(() => {
+    // Validate that content is usable
+    if (plan.content) {
+      if (typeof plan.content !== 'string') {
+        setContentError('Content format is invalid');
+      } else if (plan.content.trim().length === 0) {
+        setContentError('Study plan is empty');
+      } else {
+        setContentError(null);
+        setIsContentReady(true);
+      }
+    }
+  }, [plan.content]);
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -54,28 +72,24 @@ export default function StoredPlan({ plan, onDelete, deleteInProgress }: StoredP
           </div>
 
           <div className="flex-1 overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-[#4A3628] dark:scrollbar-thumb-[#FAF3DD] scrollbar-track-transparent">
-            <div className="prose dark:prose-invert max-w-none">
-              <div 
-                className="text-[#4A3628] dark:text-[#FAF3DD] leading-relaxed font-pangolin"
-                dangerouslySetInnerHTML={{ 
-                  __html: plan.content
-                    .replace(/\n/g, '<br />')
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                    .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-                    .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-                    .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-                    .replace(/^\- (.*$)/gm, '<li>$1</li>')
-                    .replace(/^[0-9]+\. (.*$)/gm, '<li>$1</li>')
-                    .replace(/(<li>.*<\/li>)/g, '<ul>$1</ul>')
-                    .replace(/(<li>.*<\/li>)/g, '<ol>$1</ol>')
-                    .replace(/`(.*?)`/g, '<code>$1</code>')
-                    .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
-                    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>')
-                    .replace(/!\[(.*?)\]\((.*?)\)/g, '<img src="$2" alt="$1" />')
-                    .replace(/\n\n/g, '<br /><br />')
-                }} 
-              />
+            <div className="prose prose-headings:text-[#4A3628] dark:prose-headings:text-[#FAF3DD] prose-p:text-[#4A3628] dark:prose-p:text-[#FAF3DD] prose-li:text-[#4A3628] dark:prose-li:text-[#FAF3DD] max-w-none font-pangolin">
+              {contentError ? (
+                <div className="flex flex-col items-center justify-center h-full text-center p-4">
+                  <AlertTriangle className="w-10 h-10 text-amber-500 mb-2" />
+                  <p className="text-red-500 font-pangolin">{contentError}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                    Try refreshing the page or creating a new study plan
+                  </p>
+                </div>
+              ) : isContentReady ? (
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {plan.content}
+                </ReactMarkdown>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#4A3628] dark:border-[#FAF3DD]"></div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -110,28 +124,24 @@ export default function StoredPlan({ plan, onDelete, deleteInProgress }: StoredP
                 </p>
               </div>
 
-              <div className="prose dark:prose-invert max-w-none">
-                <div 
-                  className="text-[#4A3628] dark:text-[#FAF3DD] leading-relaxed font-pangolin text-lg"
-                  dangerouslySetInnerHTML={{ 
-                    __html: plan.content
-                      .replace(/\n/g, '<br />')
-                      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                      .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-                      .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-                      .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-                      .replace(/^\- (.*$)/gm, '<li>$1</li>')
-                      .replace(/^[0-9]+\. (.*$)/gm, '<li>$1</li>')
-                      .replace(/(<li>.*<\/li>)/g, '<ul>$1</ul>')
-                      .replace(/(<li>.*<\/li>)/g, '<ol>$1</ol>')
-                      .replace(/`(.*?)`/g, '<code>$1</code>')
-                      .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
-                      .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>')
-                      .replace(/!\[(.*?)\]\((.*?)\)/g, '<img src="$2" alt="$1" />')
-                      .replace(/\n\n/g, '<br /><br />')
-                  }} 
-                />
+              <div className="prose prose-headings:text-[#4A3628] dark:prose-headings:text-[#FAF3DD] prose-p:text-[#4A3628] dark:prose-p:text-[#FAF3DD] prose-li:text-[#4A3628] dark:prose-li:text-[#FAF3DD] prose-ul:text-[#4A3628] dark:prose-ul:text-[#FAF3DD] prose-ol:text-[#4A3628] dark:prose-ol:text-[#FAF3DD] max-w-none font-pangolin">
+                {contentError ? (
+                  <div className="flex flex-col items-center justify-center text-center p-4">
+                    <AlertTriangle className="w-10 h-10 text-amber-500 mb-2" />
+                    <p className="text-red-500 font-pangolin">{contentError}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                      Try refreshing the page or creating a new study plan
+                    </p>
+                  </div>
+                ) : isContentReady ? (
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {plan.content}
+                  </ReactMarkdown>
+                ) : (
+                  <div className="flex items-center justify-center h-40">
+                    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#4A3628] dark:border-[#FAF3DD]"></div>
+                  </div>
+                )}
               </div>
 
               <button

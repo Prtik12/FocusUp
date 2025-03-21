@@ -84,6 +84,7 @@ export async function POST(req: NextRequest) {
     }
 
     const prompt = generatePrompt(subject, examDate);
+    console.log('Sending request to Groq API with prompt:', prompt.substring(0, 100) + '...');
 
     const groqResponse = await fetch(GROQ_API_URL, {
       method: 'POST',
@@ -113,9 +114,17 @@ export async function POST(req: NextRequest) {
     }
 
     const data = await groqResponse.json();
+    
+    if (!data.choices || !data.choices.length) {
+      console.error('Groq API returned no choices:', data);
+      throw new Error('No content returned from the AI model');
+    }
+    
     const generatedPlan = data.choices?.[0]?.message?.content?.trim() ?? '';
-
+    console.log('Received plan from Groq API, length:', generatedPlan.length);
+    
     if (!generatedPlan || generatedPlan.length < 500) {
+      console.error('Generated plan is too short or empty:', generatedPlan);
       throw new Error('Generated plan is incomplete or too short');
     }
 
@@ -123,6 +132,7 @@ export async function POST(req: NextRequest) {
       data: { userId, subject, examDate: new Date(examDate), content: generatedPlan }
     });
 
+    console.log('Study plan created successfully:', newPlan.id);
     return NextResponse.json(newPlan, { status: 201 });
 
   } catch (error) {
