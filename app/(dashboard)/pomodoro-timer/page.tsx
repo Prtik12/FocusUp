@@ -275,7 +275,7 @@ const PomodoroTimer = () => {
         {notificationPermission !== "granted" && (
           <button
             onClick={handleRequestNotifications}
-            className="mt-4 text-sm text-[#F96F5D] underline hover:text-[#e85b4b] transition-colors custom-cursor"
+            className="mt-4 text-sm text-[#F96F5D] underline hover:text-[#e85b4b] transition-colors custom-cursor hidden md:block"
           >
             Enable Notifications
           </button>
