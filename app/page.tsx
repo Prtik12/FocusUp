@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Pangolin } from "next/font/google";
 import { motion } from "framer-motion";
 import { FiArrowRight, FiLogIn } from "react-icons/fi";
-import { FaDiscord, FaTwitter } from "react-icons/fa";
+import { FaTwitter } from "react-icons/fa";
 import Navbar from "@/components/Navbar";
 import Loader from "@/components/ui/loader";
 import { useEffect, useState } from "react";
@@ -90,10 +90,7 @@ export default function LandingPage() {
 <div className="h-16 w-full dark:bg-[#FBF2C0] bg-[#4a3628] dark:text-[#4A3628] text-[#FAF3DD] flex flex-col sm:flex-row items-center justify-center sm:justify-between px-3 sm:px-6 text-xs sm:text-sm">
   <p className="text-center">© 2025 FocusUp. All rights reserved.</p>
   <div className="flex gap-3 sm:gap-4 mt-1 sm:mt-0">
-    <Link href="https://discord.com" target="_blank" className="hover:scale-110 transition-transform">
-      <FaDiscord className="dark:text-[#4A3628] text-[#FAF3DD] w-5 h-5 sm:w-6 sm:h-6" />
-    </Link>
-    <Link href="https://twitter.com" target="_blank" className="hover:scale-110 transition-transform">
+    <Link href="https://x.com/iPratikkk___" target="_blank" className="hover:scale-110 transition-transform">
       <FaTwitter className="dark:text-[#4A3628] text-[#FAF3DD] w-5 h-5 sm:w-6 sm:h-6" />
     </Link>
   </div>

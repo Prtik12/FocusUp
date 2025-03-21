@@ -24,15 +24,25 @@ export const useActivityTracker = () => {
     
     // Load today's existing activity from localStorage
     const loadTodayActivity = () => {
-      const today = new Date().toISOString().split('T')[0];
+      // Get today's date in YYYY-MM-DD format in local timezone
+      const today = new Date();
+      const todayStr = today.getFullYear() + '-' + 
+                      String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                      String(today.getDate()).padStart(2, '0');
+                      
+      console.log(`Loading activity for today: ${todayStr}`);
+      
       const storedActivities = localStorage.getItem('userActivities');
       
       if (storedActivities) {
         const activities = JSON.parse(storedActivities) as ActivityData[];
-        const todayActivity = activities.find(a => a.date === today);
+        const todayActivity = activities.find(a => a.date === todayStr);
         
         if (todayActivity) {
+          console.log(`Found existing activity for today: ${todayActivity.minutesActive} minutes`);
           totalActiveTime = todayActivity.minutesActive * 60; // Convert minutes to seconds
+        } else {
+          console.log('No existing activity found for today');
         }
       }
     };
@@ -41,7 +51,12 @@ export const useActivityTracker = () => {
     const saveActivity = () => {
       if (!isActive || !session?.user) return;
       
-      const today = new Date().toISOString().split('T')[0];
+      // Get today's date in YYYY-MM-DD format in local timezone
+      const today = new Date();
+      const todayStr = today.getFullYear() + '-' + 
+                      String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                      String(today.getDate()).padStart(2, '0');
+                      
       const now = new Date().toISOString();
       const elapsedSeconds = Math.floor((new Date().getTime() - activityStartTime.getTime()) / 1000);
       
@@ -62,19 +77,21 @@ export const useActivityTracker = () => {
       }
       
       // Find if today already has an entry
-      const todayIndex = activities.findIndex(a => a.date === today);
+      const todayIndex = activities.findIndex(a => a.date === todayStr);
+      
+      console.log(`Saving activity for ${todayStr}: ${minutesActive} minutes`);
       
       if (todayIndex >= 0) {
         // Update existing entry
         activities[todayIndex] = {
-          date: today,
+          date: todayStr,
           minutesActive,
           lastUpdated: now
         };
       } else {
         // Add new entry
         activities.push({
-          date: today,
+          date: todayStr,
           minutesActive,
           lastUpdated: now
         });

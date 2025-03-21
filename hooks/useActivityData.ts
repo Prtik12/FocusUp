@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { format, subDays, parseISO, differenceInMilliseconds } from 'date-fns';
 import { ActivityData } from './useActivityTracker';
 
 export type FormattedActivity = {
@@ -13,11 +12,21 @@ export const useActivityData = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [streak, setStreak] = useState(0);
   const lastRefreshRef = useRef<Date>(new Date());
-
-  // Helper function to get today's date string in local timezone
+  
+  // Get today's date in YYYY-MM-DD format in local timezone
   const getTodayDateString = () => {
-    const now = new Date();
-    return format(now, 'yyyy-MM-dd');
+    const today = new Date();
+    return today.getFullYear() + '-' + 
+           String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+           String(today.getDate()).padStart(2, '0');
+  };
+  
+  // Format a date for display (e.g., "Mar 22")
+  const formatDateForDisplay = (dateString: string) => {
+    const date = new Date(dateString);
+    const month = date.toLocaleString('default', { month: 'short' });
+    const day = date.getDate();
+    return `${month} ${day}`;
   };
 
   // Extract the loadActivityData logic to a callback so we can use it in multiple places
@@ -34,22 +43,30 @@ export const useActivityData = () => {
     
     // Log current time for debugging
     const now = new Date();
+    const todayStr = getTodayDateString();
     console.log(`Loading activity data at: ${now.toISOString()} (${now.toString()})`);
-    console.log(`Current date in user's timezone: ${getTodayDateString()}`);
+    console.log(`Current date in user's timezone: ${todayStr}`);
     
     // Create a complete array for the last 7 days
     const formattedActivities: FormattedActivity[] = [];
     
     // Fill with the last 7 days
     for (let i = 6; i >= 0; i--) {
-      const date = subDays(now, i);
-      const dateString = format(date, 'yyyy-MM-dd');
+      // Calculate date by subtracting days from today
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      
+      // Format as YYYY-MM-DD
+      const dateString = date.getFullYear() + '-' + 
+                        String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                        String(date.getDate()).padStart(2, '0');
+                        
       const activity = activities.find(a => a.date === dateString);
       
       formattedActivities.push({
         date: dateString,
         minutes: activity ? activity.minutesActive : 0,
-        formattedDate: format(date, 'MMM dd')
+        formattedDate: formatDateForDisplay(dateString)
       });
     }
     
@@ -67,8 +84,13 @@ export const useActivityData = () => {
       // If the date matches what we're looking for and has activity
       if (sortedActivities[i].date === checkDate && sortedActivities[i].minutesActive > 0) {
         currentStreak++;
-        // Set check date to the previous day
-        checkDate = format(subDays(parseISO(checkDate), 1), 'yyyy-MM-dd');
+        
+        // Set check date to the previous day (need to use our own date manipulation to stay consistent)
+        const prevDate = new Date(checkDate);
+        prevDate.setDate(prevDate.getDate() - 1);
+        checkDate = prevDate.getFullYear() + '-' + 
+                   String(prevDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                   String(prevDate.getDate()).padStart(2, '0');
       } else {
         // Break if date doesn't match or no activity
         break;
@@ -83,12 +105,18 @@ export const useActivityData = () => {
     // Update the last refresh reference
     lastRefreshRef.current = now;
     
-    console.log('Activity data loaded for dates:', formattedActivities.map(a => a.date).join(', '));
+    console.log('Activity data loaded for dates:', formattedActivities.map(a => `${a.date} (${a.formattedDate}): ${a.minutes} mins`).join(', '));
   }, []);
 
   // Function to check if the date has changed since the last refresh
   const hasDateChanged = useCallback(() => {
-    const lastRefreshDate = format(lastRefreshRef.current, 'yyyy-MM-dd');
+    // Get the date of the last refresh in YYYY-MM-DD format
+    const lastRefresh = lastRefreshRef.current;
+    const lastRefreshDate = lastRefresh.getFullYear() + '-' + 
+                           String(lastRefresh.getMonth() + 1).padStart(2, '0') + '-' + 
+                           String(lastRefresh.getDate()).padStart(2, '0');
+                           
+    // Get today's date
     const currentDate = getTodayDateString();
     
     const dateChanged = lastRefreshDate !== currentDate;
@@ -105,8 +133,8 @@ export const useActivityData = () => {
     tomorrow.setDate(tomorrow.getDate() + 1);
     tomorrow.setHours(0, 0, 0, 0);
     
-    const timeUntilMidnight = differenceInMilliseconds(tomorrow, now);
-    console.log(`Scheduled refresh at midnight in ${timeUntilMidnight}ms (${new Date(now.getTime() + timeUntilMidnight).toString()})`);
+    const timeUntilMidnight = tomorrow.getTime() - now.getTime();
+    console.log(`Scheduled refresh at midnight in ${timeUntilMidnight}ms (${tomorrow.toString()})`);
     
     // Set a timeout to refresh at midnight
     const midnightTimeout = setTimeout(() => {
