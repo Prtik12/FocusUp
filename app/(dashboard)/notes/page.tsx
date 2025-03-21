@@ -217,7 +217,10 @@ export default function NotesPage() {
 
         <button
           className="absolute top-2 right-2 text-[#D9534F] font-bold hover:text-[#C64440] custom-cursor"
-          onClick={() => setSelectedNote(null)}
+          onClick={(e) => {
+            e.preventDefault();
+            setSelectedNote(null);
+          }}
         >
           ✕
         </button>

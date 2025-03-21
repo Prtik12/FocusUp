@@ -201,6 +201,7 @@ export default function Home() {
                 />
                 <Button
                   onClick={(e) => {
+                    e.preventDefault();
                     e.stopPropagation();
                     handleAddEvent();
                   }}

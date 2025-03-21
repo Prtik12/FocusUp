@@ -92,6 +92,11 @@ export default function Sidebar() {
     router.push(path);
   }, [isMobile, router, setHovered]);
 
+  const handleClickWithPrevent = useCallback((e: React.MouseEvent, path: string) => {
+    e.preventDefault();
+    handleItemClick(path);
+  }, [handleItemClick]);
+
   return (
     <motion.div
       initial={{ width: 85 }}
@@ -140,7 +145,7 @@ export default function Sidebar() {
 
       {/* Edit Profile */}
       <div
-        onClick={() => handleItemClick("/profile")}
+        onClick={(e) => handleClickWithPrevent(e, "/profile")}
         className="w-full flex items-center p-3 mb-5 rounded-lg transition duration-300 
                   hover:bg-[#E2C799] dark:hover:bg-[#5A4532] custom-cursor min-w-[240px]"
       >
@@ -167,7 +172,7 @@ export default function Sidebar() {
         {sidebarItems.map(({ icon: Icon, label, path }) => (
           <div
             key={path}
-            onClick={() => handleItemClick(path)}
+            onClick={(e) => handleClickWithPrevent(e, path)}
             className={`flex items-center p-3 rounded-lg transition duration-300 custom-cursor min-w-[240px]
                        ${
                          pathname === path
@@ -201,7 +206,10 @@ export default function Sidebar() {
         <div
           className="w-full flex items-center p-3 rounded-lg transition duration-300 cursor-pointer custom-cursor min-w-[240px]
                     hover:bg-[#E2C799] dark:hover:bg-[#5A4532]"
-          onClick={toggleTheme}
+          onClick={(e) => {
+            e.preventDefault();
+            toggleTheme();
+          }}
         >
           <div className="shrink-0">
             {theme === "dark" ? <FiSun size={28} /> : <FiMoon size={28} />}
@@ -225,7 +233,10 @@ export default function Sidebar() {
         <div
           className="w-full flex items-center p-3 rounded-lg transition duration-300 cursor-pointer custom-cursor min-w-[240px]
                     hover:bg-[#E2C799] dark:hover:bg-[#5A4532]"
-          onClick={handleSignOut}
+          onClick={(e) => {
+            e.preventDefault();
+            handleSignOut();
+          }}
         >
           <div className="shrink-0">
             <FiLogOut size={28} />

@@ -49,7 +49,9 @@ const Sidebar: React.FC = () => {
     }
   };
 
-  const handleItemClick = async (href: string) => {
+  const handleItemClick = async (href: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    
     if (isMobile) {
       setTimeout(() => {
         setHovered(false);
@@ -73,7 +75,7 @@ const Sidebar: React.FC = () => {
       <nav className="h-full px-3">
         <ul className="space-y-2">
           {sidebarItems.map((item: SidebarItem) => (
-            <li key={item.href} onClick={() => handleItemClick(item.href)} className="flex items-center p-2 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800">
+            <li key={item.href} onClick={(e) => handleItemClick(item.href, e)} className="flex items-center p-2 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800">
               <div className="min-w-[1.5rem]">{item.icon}</div>
               <span className={cn("ml-3 whitespace-nowrap", !isExpanded && "md:hidden")}>{item.label}</span>
             </li>
