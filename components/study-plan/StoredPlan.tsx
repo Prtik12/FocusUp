@@ -53,10 +53,10 @@ export default function StoredPlan({ plan, onDelete, deleteInProgress }: StoredP
         <div className="p-6 flex flex-col h-[600px]">
           <div className="flex items-center justify-between mb-4">
             <div className="flex-1">
-              <h3 className="text-lg font-pangolin text-[#4A3628] dark:text-[#FAF3DD] truncate">
+              <h3 className="text-lg font-bold font-pangolin text-[#4A3628] dark:text-[#FAF3DD] truncate">
                 {plan.subject}
               </h3>
-              <p className="text-base text-gray-600 dark:text-gray-300 font-pangolin">
+              <p className="text-base text-gray-600 dark:text-gray-200 font-pangolin">
                 Exam Date: {format(new Date(plan.examDate), 'MMM dd, yyyy')}
               </p>
             </div>
@@ -72,19 +72,44 @@ export default function StoredPlan({ plan, onDelete, deleteInProgress }: StoredP
           </div>
 
           <div className="flex-1 overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-[#4A3628] dark:scrollbar-thumb-[#FAF3DD] scrollbar-track-transparent">
-            <div className="prose prose-headings:text-[#4A3628] dark:prose-headings:text-[#FAF3DD] prose-p:text-[#4A3628] dark:prose-p:text-[#FAF3DD] prose-li:text-[#4A3628] dark:prose-li:text-[#FAF3DD] max-w-none font-pangolin">
+            <div className="prose 
+              prose-headings:text-[#4A3628] dark:prose-headings:text-[#FAF3DD] 
+              prose-p:text-[#4A3628] dark:prose-p:text-[#FAF3DD] 
+              prose-li:text-[#4A3628] dark:prose-li:text-[#FAF3DD]
+              prose-strong:text-[#4A3628] dark:prose-strong:text-[#FAF3DD]
+              prose-em:text-[#4A3628] dark:prose-em:text-[#FAF3DD]
+              prose-code:text-[#4A3628] dark:prose-code:text-[#FAF3DD] 
+              max-w-none font-pangolin"
+            >
               {contentError ? (
                 <div className="flex flex-col items-center justify-center h-full text-center p-4">
                   <AlertTriangle className="w-10 h-10 text-amber-500 mb-2" />
-                  <p className="text-red-500 font-pangolin">{contentError}</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                  <p className="text-red-500 dark:text-red-400 font-pangolin">{contentError}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-300 mt-2">
                     Try refreshing the page or creating a new study plan
                   </p>
                 </div>
               ) : isContentReady ? (
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {plan.content}
-                </ReactMarkdown>
+                <div className="text-[#4A3628] dark:text-[#FAF3DD]">
+                  <ReactMarkdown 
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      h1: ({...props}) => <h1 className="text-[#4A3628] dark:text-[#FAF3DD] text-2xl font-bold my-4" {...props} />,
+                      h2: ({...props}) => <h2 className="text-[#4A3628] dark:text-[#FAF3DD] text-xl font-bold my-3" {...props} />,
+                      h3: ({...props}) => <h3 className="text-[#4A3628] dark:text-[#FAF3DD] text-lg font-bold my-2" {...props} />,
+                      p: ({...props}) => <p className="text-[#4A3628] dark:text-[#FAF3DD] my-2" {...props} />,
+                      ul: ({...props}) => <ul className="text-[#4A3628] dark:text-[#FAF3DD] list-disc pl-5 my-2" {...props} />,
+                      ol: ({...props}) => <ol className="text-[#4A3628] dark:text-[#FAF3DD] list-decimal pl-5 my-2" {...props} />,
+                      li: ({...props}) => <li className="text-[#4A3628] dark:text-[#FAF3DD] my-1" {...props} />,
+                      a: ({...props}) => <a className="text-blue-600 dark:text-blue-400 underline" {...props} />,
+                      em: ({...props}) => <em className="text-[#4A3628] dark:text-[#FAF3DD] italic" {...props} />,
+                      strong: ({...props}) => <strong className="text-[#4A3628] dark:text-[#FAF3DD] font-bold" {...props} />,
+                      code: ({...props}) => <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded text-[#4A3628] dark:text-[#FAF3DD]" {...props} />,
+                    }}
+                  >
+                    {plan.content}
+                  </ReactMarkdown>
+                </div>
               ) : (
                 <div className="flex items-center justify-center h-full">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#4A3628] dark:border-[#FAF3DD]"></div>
@@ -116,27 +141,44 @@ export default function StoredPlan({ plan, onDelete, deleteInProgress }: StoredP
                 <h2 className="text-2xl font-bold text-[#4A3628] dark:text-[#FAF3DD] mb-2">
                   {plan.subject}
                 </h2>
-                <p className="text-lg text-gray-600 dark:text-gray-300 font-pangolin">
+                <p className="text-lg text-gray-600 dark:text-gray-200 font-pangolin">
                   Exam Date: {format(new Date(plan.examDate), 'MMMM dd, yyyy')}
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 font-pangolin mt-1">
+                <p className="text-sm text-gray-500 dark:text-gray-300 font-pangolin mt-1">
                   Created: {format(new Date(plan.createdAt), 'MMMM dd, yyyy')}
                 </p>
               </div>
 
-              <div className="prose prose-headings:text-[#4A3628] dark:prose-headings:text-[#FAF3DD] prose-p:text-[#4A3628] dark:prose-p:text-[#FAF3DD] prose-li:text-[#4A3628] dark:prose-li:text-[#FAF3DD] prose-ul:text-[#4A3628] dark:prose-ul:text-[#FAF3DD] prose-ol:text-[#4A3628] dark:prose-ol:text-[#FAF3DD] max-w-none font-pangolin">
+              <div className="prose max-w-none font-pangolin">
                 {contentError ? (
                   <div className="flex flex-col items-center justify-center text-center p-4">
                     <AlertTriangle className="w-10 h-10 text-amber-500 mb-2" />
-                    <p className="text-red-500 font-pangolin">{contentError}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                    <p className="text-red-500 dark:text-red-400 font-pangolin">{contentError}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-300 mt-2">
                       Try refreshing the page or creating a new study plan
                     </p>
                   </div>
                 ) : isContentReady ? (
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {plan.content}
-                  </ReactMarkdown>
+                  <div className="text-[#4A3628] dark:text-[#FAF3DD]">
+                    <ReactMarkdown 
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        h1: ({...props}) => <h1 className="text-[#4A3628] dark:text-[#FAF3DD] text-2xl font-bold my-4" {...props} />,
+                        h2: ({...props}) => <h2 className="text-[#4A3628] dark:text-[#FAF3DD] text-xl font-bold my-3" {...props} />,
+                        h3: ({...props}) => <h3 className="text-[#4A3628] dark:text-[#FAF3DD] text-lg font-bold my-2" {...props} />,
+                        p: ({...props}) => <p className="text-[#4A3628] dark:text-[#FAF3DD] my-2" {...props} />,
+                        ul: ({...props}) => <ul className="text-[#4A3628] dark:text-[#FAF3DD] list-disc pl-5 my-2" {...props} />,
+                        ol: ({...props}) => <ol className="text-[#4A3628] dark:text-[#FAF3DD] list-decimal pl-5 my-2" {...props} />,
+                        li: ({...props}) => <li className="text-[#4A3628] dark:text-[#FAF3DD] my-1" {...props} />,
+                        a: ({...props}) => <a className="text-blue-600 dark:text-blue-400 underline" {...props} />,
+                        em: ({...props}) => <em className="text-[#4A3628] dark:text-[#FAF3DD] italic" {...props} />,
+                        strong: ({...props}) => <strong className="text-[#4A3628] dark:text-[#FAF3DD] font-bold" {...props} />,
+                        code: ({...props}) => <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded text-[#4A3628] dark:text-[#FAF3DD]" {...props} />,
+                      }}
+                    >
+                      {plan.content}
+                    </ReactMarkdown>
+                  </div>
                 ) : (
                   <div className="flex items-center justify-center h-40">
                     <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#4A3628] dark:border-[#FAF3DD]"></div>

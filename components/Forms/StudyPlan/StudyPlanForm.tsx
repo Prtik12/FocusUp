@@ -17,33 +17,60 @@ export default function StudyPlanForm({ userId, setStudyPlans, onPlanCreated }: 
   const [error, setError] = useState<string | null>(null);
 
   const validateForm = () => {
-    const today = new Date();
-    const selectedDate = new Date(examDate);
-    
-    if (!subject.trim()) {
-      setError('Please enter a subject');
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Reset time to start of day
+      
+      // Check subject
+      if (!subject.trim()) {
+        setError('Please enter a subject');
+        return false;
+      }
+      
+      // Check if examDate is provided
+      if (!examDate) {
+        setError('Please select an exam date');
+        return false;
+      }
+      
+      // Validate date format
+      const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+      if (!datePattern.test(examDate)) {
+        setError('Invalid date format. Please use YYYY-MM-DD');
+        return false;
+      }
+      
+      // Parse date
+      const selectedDate = new Date(examDate);
+      selectedDate.setHours(0, 0, 0, 0); // Reset time to start of day
+      
+      // Check if valid date
+      if (isNaN(selectedDate.getTime())) {
+        setError('Invalid date. Please select a valid date');
+        return false;
+      }
+      
+      // Check if in the past
+      if (selectedDate < today) {
+        setError('Exam date cannot be in the past');
+        return false;
+      }
+      
+      // Check if more than 1 year in the future
+      const maxDate = new Date(today);
+      maxDate.setFullYear(maxDate.getFullYear() + 1);
+      if (selectedDate > maxDate) {
+        setError('Exam date cannot be more than 1 year in the future');
+        return false;
+      }
+      
+      setError(null);
+      return true;
+    } catch (err) {
+      console.error('Date validation error:', err);
+      setError('An error occurred during validation. Please try again.');
       return false;
     }
-    
-    if (!examDate) {
-      setError('Please select an exam date');
-      return false;
-    }
-    
-    if (selectedDate < today) {
-      setError('Exam date cannot be in the past');
-      return false;
-    }
-    
-    const maxDate = new Date();
-    maxDate.setFullYear(maxDate.getFullYear() + 1);
-    if (selectedDate > maxDate) {
-      setError('Exam date cannot be more than 1 year in the future');
-      return false;
-    }
-    
-    setError(null);
-    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -74,17 +101,19 @@ export default function StudyPlanForm({ userId, setStudyPlans, onPlanCreated }: 
         onPlanCreated(newPlan);
       }
     } catch (err) {
+      console.error('Error creating study plan:', err);
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
       setError(errorMessage);
       toast.error('Failed to create study plan', {
         description: errorMessage
       });
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
-    <form onSubmit={handleSubmit} className=" bg-[#FAF3DD] dark:bg-[#2A1F1A] p-8 rounded-xl shadow-sm">
+    <form onSubmit={handleSubmit} className="bg-[#FAF3DD] dark:bg-[#2A1F1A] p-8 rounded-xl shadow-sm">
       <div className="space-y-6">
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -117,7 +146,7 @@ export default function StudyPlanForm({ userId, setStudyPlans, onPlanCreated }: 
         </div>
 
         {error && (
-          <div className="text-red-500 text-sm">
+          <div className="text-red-500 text-sm font-semibold p-2 bg-red-50 dark:bg-red-900/20 rounded-md">
             {error}
           </div>
         )}
