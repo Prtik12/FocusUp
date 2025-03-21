@@ -184,18 +184,18 @@ const PomodoroTimer = () => {
 
       <audio ref={chimeRef} src="/Chime.mp3" preload="auto" />
 
-      <h1 className="text-4xl font-semibold text-[#4A3628] dark:text-[#FAF3DD] mb-6">
+      <h1 className="text-2xl md:text-4xl font-semibold text-[#4A3628] dark:text-[#FAF3DD] mb-4 md:mb-6">
         Pomodoro Timer
       </h1>
 
-      <div className="bg-[#FAF3DD] dark:bg-[#2C2C2C] shadow-lg rounded-xl py-12 px-10 w-full max-w-lg flex flex-col items-center">
+      <div className="bg-[#FAF3DD] dark:bg-[#2C2C2C] shadow-lg rounded-xl py-8 md:py-12 px-6 md:px-10 w-full max-w-lg flex flex-col items-center">
         <motion.div
-          className="w-full text-center p-6 rounded-lg text-white dark:text-[#FAF3DD]"
+          className="w-full text-center p-4 md:p-6 rounded-lg text-white dark:text-[#FAF3DD]"
           animate={isFocusMode ? "focus" : "rest"}
           variants={bannerVariants}
           key={isFocusMode ? "focus" : "rest"} // Add key to force animation on mode change
         >
-          <h2 className="text-3xl font-semibold">
+          <h2 className="text-2xl md:text-3xl font-semibold">
             {isFocusMode ? "Focus Mode 🧠" : "Rest Mode ☕"}
           </h2>
           {completedCycles > 0 && (
@@ -207,23 +207,23 @@ const PomodoroTimer = () => {
         </motion.div>
 
         {/* Flip Clock Timer */}
-        <div className="flex justify-center space-x-2 my-10">
+        <div className="flex justify-center space-x-1 md:space-x-2 my-6 md:my-10">
           {[...minutes, ":", ...seconds].map((char, index) => (
             <div
               key={index}
               className={`relative ${
                 char === ":"
-                  ? "text-[#F96F5D] text-7xl mx-2"
-                  : "w-24 h-32 rounded-lg shadow-lg flex items-center justify-center bg-transparent dark:bg-[#222]"
+                  ? "text-[#F96F5D] text-4xl md:text-7xl mx-1 md:mx-2"
+                  : "w-16 md:w-24 h-24 md:h-32 rounded-lg shadow-lg flex items-center justify-center bg-transparent dark:bg-[#222]"
               }`}
             >
               {char === ":" ? (
-                <span className="text-8xl font-bold">{char}</span>
+                <span className="text-5xl md:text-8xl font-bold">{char}</span>
               ) : (
                 <AnimatePresence mode="popLayout">
                   <motion.div
                     key={char}
-                    className="absolute w-full h-full flex items-center justify-center text-8xl font-bold text-[#4A3628] dark:text-white"
+                    className="absolute w-full h-full flex items-center justify-center text-5xl md:text-8xl font-bold text-[#4A3628] dark:text-white"
                     variants={flipVariants}
                     initial="initial"
                     animate="animate"
@@ -244,24 +244,24 @@ const PomodoroTimer = () => {
         <div className="flex space-x-4 mb-6">
           <Button
             onClick={handleStartPause}
-            className="px-8 py-4 text-xl font-semibold rounded-full transition-all text-white bg-gradient-to-r from-[#F96F5D] to-[#FF4D4D] hover:scale-105 shadow-md custom-cursor"
+            className="px-6 md:px-8 py-3 md:py-4 text-lg md:text-xl font-semibold rounded-full transition-all text-white bg-gradient-to-r from-[#F96F5D] to-[#FF4D4D] hover:scale-105 shadow-md custom-cursor"
           >
             {actionButtonText}
           </Button>
           <Button
             onClick={resetTimer}
-            className="px-8 py-4 text-xl font-semibold rounded-full border-2 border-[#F96F5D] text-[#F96F5D] hover:bg-[#F96F5D] hover:text-white transition-all shadow-md custom-cursor"
+            className="px-6 md:px-8 py-3 md:py-4 text-lg md:text-xl font-semibold rounded-full border-2 border-[#F96F5D] text-[#F96F5D] hover:bg-[#F96F5D] hover:text-white transition-all shadow-md custom-cursor"
           >
             Reset
           </Button>
         </div>
 
-        <div className="flex space-x-3">
+        <div className="flex flex-wrap justify-center gap-2 md:space-x-3">
           {[15, 25, 30, 45].map((min) => (
             <Button
               key={min}
               onClick={() => setFocusTime(min)}
-              className="px-5 py-3 rounded-lg border-2 border-[#F96F5D] text-[#F96F5D] hover:bg-[#F96F5D] hover:text-white transition-all shadow-sm custom-cursor"
+              className="px-3 md:px-5 py-2 md:py-3 text-sm md:text-base rounded-lg border-2 border-[#F96F5D] text-[#F96F5D] hover:bg-[#F96F5D] hover:text-white transition-all shadow-sm custom-cursor"
             >
               {min} min
             </Button>

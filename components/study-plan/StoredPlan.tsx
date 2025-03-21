@@ -68,7 +68,7 @@ export default function StoredPlan({
               onClick={handleDelete}
               disabled={deleteInProgress}
               className={`ml-4 p-2 rounded-full transition-all duration-200 ${
-                isHovered ? "opacity-100" : "opacity-0"
+                isHovered ? "opacity-100" : "md:opacity-0 opacity-100"
               } hover:bg-red-100 dark:hover:bg-red-900/30 text-red-500 custom-cursor`}
             >
               <Trash2 className="w-5 h-5" />
