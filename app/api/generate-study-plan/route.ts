@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-export const runtime = 'edge'; // Use Edge Runtime for better performance
+// Set to node runtime as Prisma may have issues with Edge runtime for some database operations
+// export const runtime = 'edge';
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
@@ -59,23 +60,34 @@ export async function GET(req: NextRequest) {
       `Fetching study plans for userId: ${userId}, page: ${page}, timestamp: ${timestamp || "none"}`,
     );
 
-    const skip = (page - 1) * limit;
-    const total = await prisma.studyPlan.count({ where: { userId } });
-    const plans = await prisma.studyPlan.findMany({
-      where: { userId },
-      orderBy: { createdAt: "desc" },
-      skip,
-      take: limit,
-      select: {
-        id: true,
-        subject: true,
-        examDate: true,
-        content: true,
-        createdAt: true,
-      },
-    });
-
-    console.log(`Found ${plans.length} plans for user ${userId}`);
+    let plans = [];
+    let total = 0;
+    
+    try {
+      // Wrap database operations in a try/catch for better error handling
+      const skip = (page - 1) * limit;
+      total = await prisma.studyPlan.count({ where: { userId } });
+      plans = await prisma.studyPlan.findMany({
+        where: { userId },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          subject: true,
+          examDate: true,
+          content: true,
+          createdAt: true,
+        },
+      });
+      console.log(`Found ${plans.length} plans for user ${userId}`);
+    } catch (dbError) {
+      console.error("Database error:", dbError);
+      return NextResponse.json(
+        { error: "Database error", details: dbError instanceof Error ? dbError.message : String(dbError) },
+        { status: 500, headers }
+      );
+    }
 
     return NextResponse.json(
       { plans, total, page, totalPages: Math.ceil(total / limit) },
@@ -84,7 +96,10 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error("Error fetching study plans:", error);
     return NextResponse.json(
-      { error: "Failed to fetch study plans" },
+      { 
+        error: "Failed to fetch study plans",
+        details: error instanceof Error ? error.message : String(error)
+      },
       { status: 500 },
     );
   }
@@ -106,14 +121,19 @@ export async function POST(req: NextRequest) {
     const prompt = generatePrompt(subject, examDate);
     console.log("Generating study plan for:", subject);
 
-    const groqResponse = await fetch(GROQ_API_URL, {
+    // Use a timeout to ensure we don't exceed Vercel's function timeout
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error("AI generation timed out")), 9000)
+    );
+    
+    const groqResponsePromise = fetch(GROQ_API_URL, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${GROQ_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama-3-70b-8192", // Use smaller model for faster generation
+        model: "llama-3-8b-8192", // Use an even smaller model for faster generation
         messages: [
           {
             role: "system",
@@ -122,11 +142,17 @@ export async function POST(req: NextRequest) {
           },
           { role: "user", content: prompt },
         ],
-        max_tokens: 2000, // Reduced token limit for faster generation
+        max_tokens: 1500, // Further reduced token limit for faster generation
         temperature: 0.3, // Lower temperature for more focused output
         top_p: 0.8,
       }),
     });
+
+    // Race between the API call and the timeout
+    const groqResponse = await Promise.race([
+      groqResponsePromise,
+      timeoutPromise
+    ]) as Response;
 
     if (!groqResponse.ok) {
       const errorText = await groqResponse.text();
