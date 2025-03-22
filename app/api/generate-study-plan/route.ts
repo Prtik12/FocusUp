@@ -1,42 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
+export const runtime = 'edge'; // Use Edge Runtime for better performance
+
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
 // Cache duration in seconds
 const CACHE_DURATION = 60;
 
-// Generate study plan prompt ensuring sequential daily study plan
+// Optimized, shorter prompt for faster generation
 function generatePrompt(subject: string, examDate: string) {
   const currentDate = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
 
-  return `As an expert educator, create a **comprehensive daily study plan** for ${subject} starting from **${currentDate}** and ending on **${examDate}**.
+  return `Create a concise study plan for ${subject} from ${currentDate} to ${examDate}.
 
-DO NOT RETURN GENERIC TEMPLATES OR PLACEHOLDERS. EVERY SECTION MUST CONTAIN SPECIFIC CONTENT FOR ${subject.toUpperCase()}.
+Include:
+1. Brief overview of ${subject}
+2. Week-by-week schedule with key topics
+3. 3-4 recommended resources
+4. 5 study tips specific to ${subject}
+5. Progress tracking suggestions
 
-📋 **OVERVIEW**
-${subject} is [Write 2-3 specific sentences about what this subject is].
-This subject is important because [Write 2-3 specific sentences about real-world applications].
-By **${examDate}**, you will be able to [List 3-4 specific, measurable skills].
-
-📆 **DETAILED DAILY SCHEDULE (From ${currentDate} to ${examDate})**
-- Provide a **specific study plan for each day** with detailed topics, exercises, and practice materials.
-- The difficulty should gradually increase as the exam approaches.
-- Include **revision days** and **mock tests** in the final week.
-
-📚 **REQUIRED RESOURCES**
-[List specific books, courses, and practice materials relevant to ${subject}.]
-
-📊 **WEEKLY GOALS AND MILESTONES**
-[List measurable objectives and key outcomes to track progress.]
-
-💡 **PRACTICAL STUDY TIPS FOR ${subject.toUpperCase()}**
-[Provide subject-specific learning strategies.]
-
-🚀 **PROGRESS TRACKING METHOD**
-[Suggest ways for the user to track their progress effectively.]
-`;
+Format with clear headings and bullet points. Be specific to ${subject}, not generic.`;
 }
 
 // GET handler: Fetch study plans with pagination
@@ -118,10 +104,7 @@ export async function POST(req: NextRequest) {
     }
 
     const prompt = generatePrompt(subject, examDate);
-    console.log(
-      "Sending request to Groq API with prompt:",
-      prompt.substring(0, 100) + "...",
-    );
+    console.log("Generating study plan for:", subject);
 
     const groqResponse = await fetch(GROQ_API_URL, {
       method: "POST",
@@ -130,20 +113,18 @@ export async function POST(req: NextRequest) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
+        model: "llama-3-70b-8192", // Use smaller model for faster generation
         messages: [
           {
             role: "system",
             content:
-              "You are an expert educator. Your responses must be detailed and exceed 1000 words.",
+              "You are an expert educator creating concise, practical study plans. Be specific and focused.",
           },
           { role: "user", content: prompt },
         ],
-        max_tokens: 4096, // Increased token limit
-        temperature: 0.4, // Adjusted for better creativity
-        top_p: 0.7,
-        frequency_penalty: 0.3,
-        presence_penalty: 0.3,
+        max_tokens: 2000, // Reduced token limit for faster generation
+        temperature: 0.3, // Lower temperature for more focused output
+        top_p: 0.8,
       }),
     });
 
@@ -163,7 +144,7 @@ export async function POST(req: NextRequest) {
     const generatedPlan = data.choices?.[0]?.message?.content?.trim() ?? "";
     console.log("Received plan from Groq API, length:", generatedPlan.length);
 
-    if (!generatedPlan || generatedPlan.length < 500) {
+    if (!generatedPlan || generatedPlan.length < 200) {
       console.error("Generated plan is too short or empty:", generatedPlan);
       throw new Error("Generated plan is incomplete or too short");
     }
