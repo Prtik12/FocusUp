@@ -133,7 +133,7 @@ export async function POST(req: NextRequest) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama-3-8b-8192", // Use an even smaller model for faster generation
+        model: "llama-3.1-8b", // Use a valid model name that exists in Groq's API
         messages: [
           {
             role: "system",
