@@ -4,6 +4,8 @@ Stay on track with **FocusUp**, an AI-powered study planner featuring a Pomodoro
 
 ![FocusUp Banner](https://github.com/user-attachments/assets/bca7ecc2-49b0-48d7-b5a1-bcb4fa5c86c8)  
 
+---
+
 ## ✨ Features  
 
 ✅ **AI-Powered Study Planner** – Get personalized study plans with the **Groq API**.  
@@ -17,41 +19,57 @@ Stay on track with **FocusUp**, an AI-powered study planner featuring a Pomodoro
 
 ## 🚀 Tech Stack  
 
-🖥️ **Frontend:** Next.js (React, TypeScript) | Zustand (State Management) | Framer Motion (Animations) | Tailwind CSS  
-🛠️ **Backend:** Next.js API Routes | Prisma ORM | PostgreSQL  
-🔐 **Authentication:** NextAuth.js (Google OAuth)  
-💾 **Storage:** Supabase (Profile Images, Notes)  
-🤖 **AI Integration:** Groq API  
-☁️ **Deployment:** Vercel (Hosting, Cron Jobs)  
+🖥️ **Frontend:**  
+- Next.js (React, TypeScript)  
+- Zustand (State Management)  
+- Framer Motion (Animations)  
+- Tailwind CSS  
+
+🛠️ **Backend:**  
+- Next.js API Routes  
+- Prisma ORM  
+- PostgreSQL  
+
+🔐 **Authentication:**  
+- NextAuth.js (Google OAuth)  
+
+💾 **Storage:**  
+- Supabase (Profile Images, Notes)  
+
+🤖 **AI Integration:**  
+- Groq API  
+
+☁️ **Deployment:**  
+- Vercel (Hosting, Cron Jobs)  
 
 ---
 
 ## 🎯 Installation  
 
-1️⃣ **Clone the repository**  
-```
+### 1️⃣ Clone the repository  
+```sh
 git clone https://github.com/Prtik12/FocusUp.git
 cd FocusUp
 ```  
 
-2️⃣ **Install dependencies**  
-```
+### 2️⃣ Install dependencies  
+```sh
 npm install
 ```  
 
-3️⃣ **Set up environment variables**  
-```
+### 3️⃣ Set up environment variables  
+```sh
 cp .env.example .env
 ```  
 🔹 Update `.env` with your credentials (PostgreSQL, Supabase, Google OAuth, etc.).  
 
-4️⃣ **Run Prisma migrations**  
-```
+### 4️⃣ Run Prisma migrations  
+```sh
 npx prisma migrate dev
 ```  
 
-5️⃣ **Start the development server**  
-```
+### 5️⃣ Start the development server  
+```sh
 npm run dev
 ```  
 
@@ -61,9 +79,9 @@ npm run dev
 
 FocusUp automatically deletes notes older than **90 days** using **Vercel Cron Jobs**.  
 
-📌 **Setup Instructions:**  
+### 📌 Setup Instructions  
 
-📌 Add the following to `vercel.json`:  
+📌 **Add the following to `vercel.json`**:  
 ```json
 {
   "crons": [{
@@ -73,12 +91,12 @@ FocusUp automatically deletes notes older than **90 days** using **Vercel Cron J
 }
 ```  
 
-📌 Add a secret to Vercel for security:  
-```
+📌 **Add a secret to Vercel for security**:  
+```sh
 vercel env add CRON_SECRET your_secret_key
 ```  
 
-📌 Secure the cron job in `app/api/cleanup-notes/route.ts`:  
+📌 **Secure the cron job in `app/api/cleanup-notes/route.ts`**:  
 ```ts
 export async function GET(req: Request) {
   if (req.headers.get("Authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -92,6 +110,4 @@ export async function GET(req: Request) {
 
 ## 📜 License  
 
-This project is **MIT Licensed** – feel free to use, modify, and contribute! 🎉  
-
----
+This project is **MIT Licensed** – feel free to use, modify, and contribute! 🎉 
