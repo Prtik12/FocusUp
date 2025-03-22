@@ -25,7 +25,7 @@ a {
 }
 
 .custom-cursor {
-  cursor: url("/CursorPointer.png") 5 5, pointer;
+  cursor: url("/CursorPointer.png") 5 5, pointer !important;
 }
 
 .react-calendar__tile {
