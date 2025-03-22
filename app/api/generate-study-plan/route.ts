@@ -133,7 +133,7 @@ export async function POST(req: NextRequest) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama-3.1-8b", // Use a valid model name that exists in Groq's API
+        model: "llama-3.3-70b-versatile", // Revert to the original model that worked
         messages: [
           {
             role: "system",
@@ -142,7 +142,7 @@ export async function POST(req: NextRequest) {
           },
           { role: "user", content: prompt },
         ],
-        max_tokens: 1500, // Further reduced token limit for faster generation
+        max_tokens: 1500, // Keeping reduced token limit for faster generation
         temperature: 0.3, // Lower temperature for more focused output
         top_p: 0.8,
       }),
