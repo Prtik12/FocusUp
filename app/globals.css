@@ -17,25 +17,19 @@ body {
 
 button,
 a {
-  cursor:
-    url("/CursorPointer.png") 5 5,
-    pointer;
+  cursor: url("/CursorPointer.png") 5 5, pointer;
 }
 
 .sidebar * {
-  cursor:
-    url("/CursorPointer.png") 5 5,
-    pointer !important;
+  cursor: url("/CursorPointer.png") 5 5, pointer !important;
 }
 
 .custom-cursor {
-  cursor:
-    url("/CursorPointer.png") 5 5,
-    pointer !important;
+  cursor: url("/CursorPointer.png") 5 5, pointer;
 }
 
 .react-calendar__tile {
-  cursor: pointer !important; /* Forces the cursor to apply */
+  cursor: url("/CursorPointer.png") 5 5, pointer !important; /* Forces the cursor to apply */
 }
 
 .custom-calendar {
@@ -88,15 +82,11 @@ a {
 }
 
 .react-calendar * {
-  cursor:
-    url("/CursorPointer.png") 5 5,
-    pointer !important;
+  cursor: url("/CursorPointer.png") 5 5, pointer !important;
 }
 
 .react-calendar__tile {
-  cursor:
-    url("/CursorPointer.png") 5 5,
-    pointer !important;
+  cursor: url("/CursorPointer.png") 5 5, pointer !important;
 }
 
 /* Calendar custom styling */
@@ -306,11 +296,6 @@ a {
 
 .stats-card:hover {
   transform: translateY(-5px);
-}
-
-/* Custom cursor for interactive elements */
-.custom-cursor {
-  cursor: pointer;
 }
 
 /* Event card animations */
