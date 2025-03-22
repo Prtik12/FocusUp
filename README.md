@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📕 FocusUp – Boost Your Productivity! 🚀  
 
-## Getting Started
+Stay on track with **FocusUp**, an AI-powered study planner featuring a Pomodoro timer, task manager, and event tracking—all in one place!  
 
-First, run the development server:
+![FocusUp Banner](https://github.com/user-attachments/assets/bca7ecc2-49b0-48d7-b5a1-bcb4fa5c86c8)  
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## ✨ Features  
+
+✅ **AI-Powered Study Planner** – Get personalized study plans with the **Groq API**.  
+⏳ **Pomodoro Timer** – Flip-clock style timer with automatic session transitions.  
+🗂️ **Task & Event Manager** – Plan tasks, add calendar events, and track progress.  
+📝 **Notes with Auto Cleanup** – Automatically deletes notes older than 90 days.  
+🔥 **Activity Streaks & Fun Animations** – Stay motivated with streak tracking and smooth UI effects.  
+🔑 **Google Authentication** – Secure and seamless sign-in with OAuth.  
+
+---
+
+## 🚀 Tech Stack  
+
+🖥️ **Frontend:** Next.js (React, TypeScript) | Zustand (State Management) | Framer Motion (Animations) | Tailwind CSS  
+🛠️ **Backend:** Next.js API Routes | Prisma ORM | PostgreSQL  
+🔐 **Authentication:** NextAuth.js (Google OAuth)  
+💾 **Storage:** Supabase (Profile Images, Notes)  
+🤖 **AI Integration:** Groq API  
+☁️ **Deployment:** Vercel (Hosting, Cron Jobs)  
+
+---
+
+## 🎯 Installation  
+
+1️⃣ **Clone the repository**  
 ```
+git clone https://github.com/Prtik12/FocusUp.git
+cd FocusUp
+```  
 
-Open [https://focus-up-rose.vercel.app](https://focus-up-rose.vercel.app) with your browser to see the result.
+2️⃣ **Install dependencies**  
+```
+npm install
+```  
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3️⃣ **Set up environment variables**  
+```
+cp .env.example .env
+```  
+🔹 Update `.env` with your credentials (PostgreSQL, Supabase, Google OAuth, etc.).  
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4️⃣ **Run Prisma migrations**  
+```
+npx prisma migrate dev
+```  
 
-## Learn More
+5️⃣ **Start the development server**  
+```
+npm run dev
+```  
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🔄 Auto-Deleting Notes (Vercel Cron Job)  
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+FocusUp automatically deletes notes older than **90 days** using **Vercel Cron Jobs**.  
 
-## Deploy on Vercel
+📌 **Setup Instructions:**  
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+📌 Add the following to `vercel.json`:  
+```json
+{
+  "crons": [{
+    "path": "/api/cleanup-notes",
+    "schedule": "0 0 1 * *"
+  }]
+}
+```  
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+📌 Add a secret to Vercel for security:  
+```
+vercel env add CRON_SECRET your_secret_key
+```  
+
+📌 Secure the cron job in `app/api/cleanup-notes/route.ts`:  
+```ts
+export async function GET(req: Request) {
+  if (req.headers.get("Authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+  // Cleanup logic here...
+}
+```  
+
+---
+
+## 📜 License  
+
+This project is **MIT Licensed** – feel free to use, modify, and contribute! 🎉  
+
+---
