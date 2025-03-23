@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Pangolin } from "next/font/google";
 import { AuthProvider } from "@/providers/NextAuthProviders";
 import { ThemeProvider } from "@/providers/ThemeProviders";
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
@@ -63,6 +64,7 @@ export default function RootLayout({
         <AuthProvider>
           <ThemeProvider>
             {children}
+            <SpeedInsights />
             <Analytics />
           </ThemeProvider>
         </AuthProvider>
