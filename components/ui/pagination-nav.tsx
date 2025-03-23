@@ -33,7 +33,7 @@ export default function PaginationNav({
         className={`px-4 py-2 rounded-md transition-colors ${
           page === 1 || isDisabled
             ? "bg-gray-300 cursor-not-allowed"
-            : "bg-[#4A3628] dark:bg-[#FAF3DD] text-[#FAF3DD] dark:text-[#4A3628] hover:bg-[#3a2b1f] dark:hover:bg-[#e3dcc9]"
+            : "bg-[#4A3628] dark:bg-[#FAF3DD] text-[#FAF3DD] dark:text-[#4A3628] hover:bg-[#3a2b1f] dark:hover:bg-[#e3dcc9] custom-cursor"
         }`}
       >
         Previous
@@ -49,7 +49,7 @@ export default function PaginationNav({
         className={`px-4 py-2 rounded-md transition-colors ${
           page === pageCount || isDisabled
             ? "bg-gray-300 cursor-not-allowed"
-            : "bg-[#4A3628] dark:bg-[#FAF3DD] text-[#FAF3DD] dark:text-[#4A3628] hover:bg-[#3a2b1f] dark:hover:bg-[#e3dcc9]"
+            : "bg-[#4A3628] dark:bg-[#FAF3DD] text-[#FAF3DD] dark:text-[#4A3628] hover:bg-[#3a2b1f] dark:hover:bg-[#e3dcc9] custom-cursor"
         }`}
       >
         Next

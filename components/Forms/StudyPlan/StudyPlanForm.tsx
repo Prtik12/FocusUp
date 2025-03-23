@@ -148,7 +148,7 @@ export default function StudyPlanForm({
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
             placeholder="What do you want to study?"
-            className="w-full pl-10 pr-4 py-3 border-0 border-b-2 border-gray-200 dark:border-gray-700 focus:border-[#4A3628] dark:focus:border-[#FAF3DD] bg-transparent text-[#4A3628] dark:text-[#FAF3DD] placeholder-gray-400 focus:ring-0 transition-colors"
+            className="w-full pl-10 pr-4 py-3 border-0 border-b-2 border-gray-200 dark:border-gray-700 focus:border-[#4A3628] dark:focus:border-[#FAF3DD] bg-transparent text-[#4A3628] dark:text-[#FAF3DD] placeholder-gray-400 focus:ring-0 transition-colors custom-cursor"
             required
           />
         </div>
@@ -180,7 +180,7 @@ export default function StudyPlanForm({
           className={`w-full py-3 px-4 rounded-lg transition-all ${
             loading
               ? "bg-gray-400 cursor-not-allowed"
-              : "bg-[#4A3628] dark:bg-[#FAF3DD] text-[#FAF3DD] dark:text-[#4A3628] hover:bg-[#3a2b1f] dark:hover:bg-[#e3dcc9] hover:shadow-md"
+              : "bg-[#4A3628] dark:bg-[#FAF3DD] text-[#FAF3DD] dark:text-[#4A3628] hover:bg-[#3a2b1f] dark:hover:bg-[#e3dcc9] hover:shadow-md custom-cursor"
           }`}
         >
           {loading ? "Generating..." : "Generate Plan"}

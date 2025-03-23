@@ -203,6 +203,7 @@ export default function StudyPlanPage() {
                         delay: Math.min(index * 0.05, 0.3) // Cap delay at 0.3s
                       }}
                       layout="position"
+                      className="study-plan-card custom-cursor"
                     >
                       <StoredPlan
                         plan={plan}

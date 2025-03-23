@@ -16,7 +16,14 @@ body {
 }
 
 button,
-a {
+a,
+[role="button"],
+input[type="submit"],
+input[type="button"],
+.clickable,
+.interactive,
+select,
+details summary {
   cursor: url("/CursorPointer.png") 5 5, pointer;
 }
 
@@ -28,15 +35,19 @@ a {
   cursor: url("/CursorPointer.png") 5 5, pointer !important;
 }
 
-.react-calendar__tile {
-  cursor: url("/CursorPointer.png") 5 5, pointer !important; /* Forces the cursor to apply */
+/* Ensure the cursor is applied specifically to these elements */
+button:not(:disabled),
+a:not(:disabled),
+[role="button"]:not(:disabled),
+.study-plan-card,
+.pagination-button:not(:disabled),
+.react-calendar__tile:not(:disabled),
+.react-calendar button:not(:disabled) {
+  cursor: url("/CursorPointer.png") 5 5, pointer !important;
 }
 
-.custom-calendar {
-  width: 100%;
-  border: none;
-  font-family: "Pangolin", cursive;
-  background: transparent;
+.react-calendar__tile {
+  cursor: url("/CursorPointer.png") 5 5, pointer !important; /* Forces the cursor to apply */
 }
 
 .react-calendar {
@@ -456,4 +467,11 @@ a {
   .dark .event-modal {
     background-color: rgba(58, 41, 26, 0.95);
   }
+}
+
+.custom-calendar {
+  width: 100%;
+  border: none;
+  font-family: "Pangolin", cursive;
+  background: transparent;
 }
