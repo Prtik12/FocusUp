@@ -207,13 +207,27 @@ export async function POST(req: NextRequest) {
 
 // DELETE handler: Remove a study plan by ID
 export async function DELETE(req: NextRequest) {
+  console.log("Received DELETE request for study plan");
+  
   try {
     const body = await req.json();
     const { planId, userId } = body;
 
+    console.log(`Delete request for planId: ${planId}, userId: ${userId}`);
+
     if (!planId || !userId) {
+      console.log("Missing planId or userId in delete request");
       return NextResponse.json(
         { error: "Missing planId or userId" },
+        { status: 400 },
+      );
+    }
+
+    // Validate ID formats
+    if (!/^c[a-z0-9]+$/i.test(planId)) {
+      console.log(`Invalid planId format: ${planId}`);
+      return NextResponse.json(
+        { error: "Invalid planId format" },
         { status: 400 },
       );
     }
@@ -224,6 +238,7 @@ export async function DELETE(req: NextRequest) {
     });
 
     if (!studyPlan) {
+      console.log(`Study plan not found: ${planId}`);
       return NextResponse.json(
         { error: "Study plan not found" },
         { status: 404 },
@@ -231,13 +246,38 @@ export async function DELETE(req: NextRequest) {
     }
 
     if (studyPlan.userId !== userId) {
+      console.log(`Unauthorized deletion attempt - planId: ${planId}, requestUserId: ${userId}, actualUserId: ${studyPlan.userId}`);
       return NextResponse.json(
         { error: "Unauthorized: Cannot delete this plan" },
         { status: 403 },
       );
     }
 
-    await prisma.studyPlan.delete({ where: { id: planId } });
+    // Use transaction for deletion to ensure atomicity
+    await prisma.$transaction(async (tx) => {
+      // Perform the deletion operation
+      await tx.studyPlan.delete({ 
+        where: { id: planId } 
+      });
+      
+      // Verify the plan is actually deleted
+      const verifyDeleted = await tx.studyPlan.findUnique({
+        where: { id: planId }
+      });
+      
+      if (verifyDeleted) {
+        throw new Error("Failed to delete study plan - still exists after deletion");
+      }
+      
+      return { success: true };
+    }, {
+      // Set transaction timeout
+      timeout: 10000, // 10 seconds
+      maxWait: 5000,  // 5 seconds max wait time
+      isolationLevel: "Serializable", // Highest isolation level
+    });
+
+    console.log(`Successfully deleted study plan: ${planId}`);
 
     // Set cache control to prevent caching of this response
     const headers = new Headers();
@@ -246,9 +286,31 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ success: true }, { status: 200, headers });
   } catch (error) {
     console.error("Error deleting study plan:", error);
+    
+    // Define interface for Prisma errors
+    interface PrismaError extends Error {
+      code?: string;
+      meta?: Record<string, unknown>;
+    }
+    
+    // Check if this is a Prisma error
+    const isPrismaError = error instanceof Error && 
+      'code' in error && typeof (error as PrismaError).code === 'string';
+    
+    // Determine if this is a transient error that could be retried
+    const isTransientError = isPrismaError && 
+      ['P1001', 'P1002', 'P1008', 'P1011', 'P1017'].includes((error as PrismaError).code || '');
+    
+    const statusCode = isTransientError ? 503 : 500; // Service Unavailable for transient errors
+    const errorMessage = error instanceof Error ? error.message : "Failed to delete study plan";
+    
     return NextResponse.json(
-      { error: "Failed to delete study plan" },
-      { status: 500 },
+      { 
+        error: errorMessage,
+        code: isPrismaError ? (error as PrismaError).code : undefined,
+        isTransient: isTransientError
+      },
+      { status: statusCode },
     );
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Sidebar from "@/components/Sidebar";
 import BottomBar from "@/components/BottomBar";
@@ -47,6 +47,8 @@ export default function Home() {
     removeEvent,
   } = useEventStore();
 
+  const [isCreatingEvent, setIsCreatingEvent] = useState(false);
+
   const updateModalPositionCallback = useCallback(() => {
     updateModalPosition({
       top: Math.max(20, window.innerHeight / 2 - 200),
@@ -65,9 +67,17 @@ export default function Home() {
       )
     : [];
 
-  const handleAddEvent = () => {
-    if (!newEventTitle || !selectedDate) return;
-    createEvent(newEventTitle, selectedDate);
+  const handleAddEvent = async () => {
+    if (!newEventTitle || !selectedDate || isCreatingEvent) return;
+    
+    setIsCreatingEvent(true);
+    try {
+      await createEvent(newEventTitle, selectedDate);
+    } catch (error) {
+      console.error("Error creating event:", error);
+    } finally {
+      setIsCreatingEvent(false);
+    }
   };
 
   return (
@@ -233,9 +243,12 @@ export default function Home() {
                     e.stopPropagation();
                     handleAddEvent();
                   }}
-                  className="w-full bg-gradient-to-r from-[#F96F5D] to-[#FF4D4D] text-white px-4 py-3 mt-3 rounded-md hover:scale-105 transition-all"
+                  disabled={isCreatingEvent}
+                  className={`w-full bg-gradient-to-r from-[#F96F5D] to-[#FF4D4D] text-white px-4 py-3 mt-3 rounded-md hover:scale-105 transition-all ${
+                    isCreatingEvent ? "opacity-70 cursor-not-allowed" : ""
+                  }`}
                 >
-                  Add Event
+                  {isCreatingEvent ? "Adding..." : "Add Event"}
                 </Button>
               </div>
             </motion.div>

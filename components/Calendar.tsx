@@ -12,6 +12,27 @@ type CalendarProps = {
 
 const DAYS = ["S", "M", "T", "W", "T", "F", "S"];
 
+// Helper function to ensure dates are compared in local timezone
+const areDatesEqual = (date1: Date, date2: Date): boolean => {
+  return (
+    date1.getFullYear() === date2.getFullYear() &&
+    date1.getMonth() === date2.getMonth() &&
+    date1.getDate() === date2.getDate()
+  );
+};
+
+// Helper to convert ISO string to local date without timezone issues
+const parseLocalDate = (dateString: string): Date => {
+  // For ISO strings from DB, convert to local date properly
+  const date = new Date(dateString);
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    0, 0, 0
+  );
+};
+
 export default function Calendar({
   selectedDate,
   setSelectedDate,
@@ -58,16 +79,18 @@ export default function Calendar({
           const today = new Date();
           let className = "custom-cursor";
 
-          const hasEvent = events.some(
-            (event) =>
-              new Date(event.date).toDateString() === date.toDateString(),
-          );
+          // Check for events in local timezone
+          const hasEvent = events.some((event) => {
+            const eventDate = parseLocalDate(event.date);
+            return areDatesEqual(eventDate, date);
+          });
 
           if (hasEvent) {
             className += " calendar-day-with-events";
           }
 
-          if (date.toDateString() === today.toDateString()) {
+          // Compare today's date in local timezone
+          if (areDatesEqual(date, today)) {
             className += " today-highlight";
           }
 

@@ -130,22 +130,65 @@ export default function StudyPlanPage() {
     );
     if (!shouldDelete) return;
 
+    // Set the deleting state immediately
     setIsDeleting(planId);
-
-    try {
-      await apiClient.deleteStudyPlan(planId, userId);
-      setStudyPlans((prev) => prev.filter((plan) => plan.id !== planId));
-      toast.success("Study plan deleted successfully");
-
-      if (studyPlans.length === 1 && page > 1) {
-        setPage((prev) => prev - 1);
+    
+    // Show loading toast
+    const loadingToast = toast.loading("Deleting study plan...");
+    
+    // Track deletion attempts
+    let attempts = 0;
+    const maxAttempts = 3;
+    
+    const attemptDeletion = async (): Promise<boolean> => {
+      try {
+        await apiClient.deleteStudyPlan(planId, userId);
+        return true;
+      } catch (err) {
+        console.error(`Error deleting study plan (attempt ${attempts + 1}):`, err);
+        return false;
       }
-    } catch (err) {
-      console.error("Error deleting study plan:", err);
-      toast.error("Failed to delete study plan", { description: String(err) });
-    } finally {
-      setIsDeleting(null);
+    };
+    
+    while (attempts < maxAttempts) {
+      attempts++;
+      const success = await attemptDeletion();
+      
+      if (success) {
+        // Update local state to reflect deletion
+        setStudyPlans((prev) => prev.filter((plan) => plan.id !== planId));
+        
+        // Dismiss loading toast and show success
+        toast.dismiss(loadingToast);
+        toast.success("Study plan deleted successfully");
+        
+        // Handle pagination when last item on page is deleted
+        if (studyPlans.length === 1 && page > 1) {
+          setPage((prev) => prev - 1);
+        }
+        
+        // Refetch to ensure state is in sync with server
+        setTimeout(() => {
+          fetchPlans(true);
+        }, 500);
+        
+        setIsDeleting(null);
+        return;
+      }
+      
+      // Wait between attempts (except the last one)
+      if (attempts < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
+      }
     }
+    
+    // All attempts failed
+    toast.dismiss(loadingToast);
+    toast.error("Failed to delete study plan after multiple attempts", { 
+      description: "Please try again later or refresh the page."
+    });
+    
+    setIsDeleting(null);
   };
 
   const handlePlanCreated = (newPlan: StudyPlan) => {

@@ -43,20 +43,56 @@ export const apiClient = {
   },
 
   async deleteStudyPlan(planId: string, userId: string) {
-    const response = await fetch(`${API_BASE_URL}/generate-study-plan`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ planId, userId }),
-      cache: "no-store",
-    });
+    // Try up to 3 times
+    let attempts = 0;
+    const maxAttempts = 3;
+    let lastError: Error | unknown = null;
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || "Failed to delete study plan");
+    while (attempts < maxAttempts) {
+      attempts++;
+      try {
+        console.log(`Deleting study plan: ${planId}, attempt ${attempts}`);
+        
+        // Use AbortController to add a timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 seconds timeout
+        
+        const response = await fetch(`${API_BASE_URL}/generate-study-plan`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ planId, userId }),
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to delete study plan");
+        }
+
+        return response.json();
+      } catch (error) {
+        console.error(`Delete attempt ${attempts} failed:`, error);
+        lastError = error;
+        
+        // If it's an AbortError, it's a timeout
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          console.log("Request timed out. Retrying...");
+        }
+        
+        // Don't wait on the last attempt
+        if (attempts < maxAttempts) {
+          // Exponential backoff: wait longer with each retry
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
+        }
+      }
     }
 
-    return response.json();
+    // All attempts failed
+    throw lastError || new Error("Failed to delete study plan after multiple attempts");
   },
 };

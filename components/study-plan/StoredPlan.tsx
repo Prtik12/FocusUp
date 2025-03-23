@@ -69,9 +69,18 @@ export default function StoredPlan({
               disabled={deleteInProgress}
               className={`ml-4 p-2 rounded-full transition-all duration-200 ${
                 isHovered ? "opacity-100" : "md:opacity-0 opacity-100"
-              } hover:bg-red-100 dark:hover:bg-red-900/30 text-red-500 custom-cursor`}
+              } ${
+                deleteInProgress 
+                  ? "bg-red-100 dark:bg-red-900/30 cursor-not-allowed"
+                  : "hover:bg-red-100 dark:hover:bg-red-900/30 custom-cursor"
+              } text-red-500`}
+              aria-label="Delete study plan"
             >
-              <Trash2 className="w-5 h-5" />
+              {deleteInProgress ? (
+                <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                <Trash2 className="w-5 h-5" />
+              )}
             </button>
           </div>
 

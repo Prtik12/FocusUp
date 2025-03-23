@@ -32,6 +32,7 @@ export default function NotesPage() {
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [loadingNoteId, setLoadingNoteId] = useState<string | null>(null);
   const [loadingDeleteAll, setLoadingDeleteAll] = useState(false);
+  const [isAddingNote, setIsAddingNote] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -57,8 +58,9 @@ export default function NotesPage() {
   }, [fetchNotes]);
 
   const addNote = async () => {
-    if (!title.trim() || !body.trim() || !userId) return;
+    if (!title.trim() || !body.trim() || !userId || isAddingNote) return;
 
+    setIsAddingNote(true);
     try {
       await fetch("/api/notes", {
         method: "POST",
@@ -70,6 +72,8 @@ export default function NotesPage() {
       fetchNotes();
     } catch (error) {
       console.error("Error adding note:", error);
+    } finally {
+      setIsAddingNote(false);
     }
   };
 
@@ -152,8 +156,9 @@ export default function NotesPage() {
           <button
             className="mt-3 w-full bg-[#F96F5D] text-white px-4 py-2 rounded-md font-semibold hover:bg-[#e85b4b] transition-all custom-cursor"
             onClick={addNote}
+            disabled={isAddingNote}
           >
-            Add Note
+            {isAddingNote ? "Adding Note..." : "Add Note"}
           </button>
         </div>
 
