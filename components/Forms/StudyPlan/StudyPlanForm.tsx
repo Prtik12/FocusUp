@@ -3,10 +3,11 @@ import { apiClient } from "@/lib/api-client";
 import { StudyPlan } from "@/types/studyPlan";
 import { toast } from "sonner";
 import { Calendar, BookOpen } from "lucide-react";
+import { useStudyPlanStore } from "@/store/studyPlanStore";
 
 interface StudyPlanFormProps {
   userId: string;
-  setStudyPlans: React.Dispatch<React.SetStateAction<StudyPlan[]>>;
+  setStudyPlans?: React.Dispatch<React.SetStateAction<StudyPlan[]>>; // Optional now
   onPlanCreated?: (newPlan: StudyPlan) => void;
 }
 
@@ -19,6 +20,9 @@ export default function StudyPlanForm({
   const [examDate, setExamDate] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Get the createPlan action from the store
+  const createPlan = useStudyPlanStore(state => state.createPlan);
 
   const validateForm = () => {
     try {
@@ -96,8 +100,13 @@ export default function StudyPlanForm({
         examDate,
       );
 
-      // Update local state
-      setStudyPlans((prev) => [newPlan, ...prev]);
+      // Update state via Zustand store
+      createPlan(newPlan);
+      
+      // Also update via prop if provided (for backward compatibility)
+      if (setStudyPlans) {
+        setStudyPlans((prev) => [newPlan, ...prev]);
+      }
 
       // Reset form
       setSubject("");
