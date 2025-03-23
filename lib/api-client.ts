@@ -26,11 +26,32 @@ export const apiClient = {
 
     const data = await response.json();
     
-    // Filter out any plans that were marked as deleted in session storage
+    // Get from both localStorage (more persistent) and sessionStorage
+    let deletedIds: string[] = [];
     try {
-      const deletedIds = JSON.parse(sessionStorage.getItem('deletedPlanIds') || '[]');
+      // First check localStorage
+      const localStorageIds = localStorage.getItem('deletedPlanIds');
+      if (localStorageIds) {
+        deletedIds = JSON.parse(localStorageIds);
+      }
+      
+      // Also check sessionStorage as a fallback
+      const sessionStorageIds = sessionStorage.getItem('deletedPlanIds');
+      if (sessionStorageIds) {
+        const sessionIds = JSON.parse(sessionStorageIds);
+        // Combine the two lists without duplicates
+        deletedIds = [...new Set([...deletedIds, ...sessionIds])];
+      }
+      
+      // If we found deleted IDs, filter the plans
       if (deletedIds.length > 0 && Array.isArray(data.plans)) {
+        console.log(`Filtering out ${deletedIds.length} deleted plans from API response`);
         data.plans = data.plans.filter((plan: { id: string }) => !deletedIds.includes(plan.id));
+        
+        // Also adjust the total count
+        if (data.total) {
+          data.total = Math.max(0, data.total - deletedIds.length);
+        }
       }
     } catch (e) {
       console.error("Error filtering deleted plans from API response:", e);

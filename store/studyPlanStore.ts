@@ -42,11 +42,29 @@ const addToDeletedPlanIds = (planId: string): void => {
     if (!deletedIds.includes(planId)) {
       deletedIds.push(planId);
       sessionStorage.setItem('deletedPlanIds', JSON.stringify(deletedIds));
+      // Every time we update deletedIds, also store in localStorage for persistence across sessions
+      localStorage.setItem('deletedPlanIds', JSON.stringify(deletedIds));
     }
   } catch (e) {
     console.error('Failed to store deleted plan ID:', e);
   }
 };
+
+// Sync deleted IDs from localStorage to sessionStorage on init
+const syncDeletedIdsFromStorage = (): void => {
+  try {
+    // Try to get from localStorage first (more persistent)
+    const localStorageIds = localStorage.getItem('deletedPlanIds');
+    if (localStorageIds) {
+      sessionStorage.setItem('deletedPlanIds', localStorageIds);
+    }
+  } catch (e) {
+    console.error('Failed to sync deleted plan IDs from storage:', e);
+  }
+};
+
+// Run sync on module load
+syncDeletedIdsFromStorage();
 
 export const useStudyPlanStore = create<StudyPlanState>((set, get) => ({
   // Initial state
@@ -66,6 +84,9 @@ export const useStudyPlanStore = create<StudyPlanState>((set, get) => ({
     set({ isLoading: true, error: null });
     
     try {
+      // Force sync deleted IDs before fetching
+      syncDeletedIdsFromStorage();
+      
       const { currentPage, itemsPerPage } = get();
       const data = await apiClient.getStudyPlans(
         userId,
@@ -75,14 +96,23 @@ export const useStudyPlanStore = create<StudyPlanState>((set, get) => ({
       );
       
       if (Array.isArray(data?.plans)) {
-        // Filter out deleted plans
+        // Get the latest deleted IDs
         const deletedIds = getDeletedPlanIds();
-        const filteredPlans = data.plans.filter((plan: StudyPlan) => !deletedIds.includes(plan.id));
+        console.log("Filtering with deleted IDs:", deletedIds);
+        
+        // Filter out deleted plans
+        const filteredPlans = data.plans.filter((plan: StudyPlan) => {
+          const shouldKeep = !deletedIds.includes(plan.id);
+          if (!shouldKeep) {
+            console.log(`Filtering out deleted plan: ${plan.id}`);
+          }
+          return shouldKeep;
+        });
         
         set({
           plans: filteredPlans,
-          total: data.total || 0,
-          totalPages: Math.ceil((data.total || 0) / get().itemsPerPage),
+          total: Math.max((data.total || 0) - deletedIds.length, 0),
+          totalPages: Math.ceil(Math.max((data.total || 0) - deletedIds.length, 0) / get().itemsPerPage),
           isLoading: false
         });
       } else {
@@ -97,6 +127,17 @@ export const useStudyPlanStore = create<StudyPlanState>((set, get) => ({
   },
   
   createPlan: (plan: StudyPlan) => {
+    // Track the plan we're creating to avoid duplication
+    const { plans } = get();
+    const existingPlan = plans.find(p => p.id === plan.id);
+    
+    // If this plan already exists, don't add it again
+    if (existingPlan) {
+      console.log(`Plan ${plan.id} already exists, not duplicating`);
+      return;
+    }
+    
+    console.log(`Adding plan ${plan.id} to store`);
     set({ lastCreatedPlan: plan });
     
     // Add to the beginning of the list if we're on page 1
@@ -132,22 +173,40 @@ export const useStudyPlanStore = create<StudyPlanState>((set, get) => ({
       return false;
     }
     
+    console.log(`Attempting to delete plan: ${planId}`);
+    
     // Set deleting state
     set({ isDeleting: planId });
     
-    // Add to deleted IDs in session storage (for persistence)
+    // Add to deleted IDs in both session and local storage (for persistence)
     addToDeletedPlanIds(planId);
     
+    // Double-check our arrays include this planId
+    const confirmDeletedIds = getDeletedPlanIds();
+    console.log(`Plan ${planId} is in deleted IDs: ${confirmDeletedIds.includes(planId)}`);
+    
     // Optimistically update UI by removing the plan
-    set(state => ({
-      plans: state.plans.filter(plan => plan.id !== planId),
-      total: Math.max(0, state.total - 1),
-      totalPages: Math.ceil(Math.max(0, state.total - 1) / state.itemsPerPage)
-    }));
+    set(state => {
+      // First verify the plan is in state
+      const planExists = state.plans.some(plan => plan.id === planId);
+      console.log(`Plan ${planId} exists in state: ${planExists}`);
+      
+      // Only decrement total if plan actually exists
+      const newTotal = planExists 
+        ? Math.max(0, state.total - 1)
+        : state.total;
+        
+      return {
+        plans: state.plans.filter(plan => plan.id !== planId),
+        total: newTotal,
+        totalPages: Math.ceil(Math.max(0, newTotal) / state.itemsPerPage)
+      };
+    });
     
     const loadingToast = toast.loading("Deleting study plan...");
     
     try {
+      // Execute delete on server
       await apiClient.deleteStudyPlan(planId, userId);
       
       toast.dismiss(loadingToast);
@@ -163,6 +222,12 @@ export const useStudyPlanStore = create<StudyPlanState>((set, get) => ({
           const { fetchPlans } = get();
           fetchPlans(userId, true);
         }, 300);
+      } else {
+        // Even if the current page isn't empty, do a refresh to ensure sync
+        setTimeout(() => {
+          const { fetchPlans } = get();
+          fetchPlans(userId, true);
+        }, 500);
       }
       
       set({ isDeleting: null });
@@ -174,6 +239,10 @@ export const useStudyPlanStore = create<StudyPlanState>((set, get) => ({
       toast.error("Network issue while deleting plan", {
         description: "The plan will be removed after page refresh"
       });
+      
+      // Despite the error, make sure this plan is properly marked as deleted
+      // and doesn't reappear on next fetch
+      addToDeletedPlanIds(planId);
       
       set({ isDeleting: null });
       return false;

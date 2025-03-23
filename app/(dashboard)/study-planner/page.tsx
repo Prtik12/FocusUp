@@ -99,8 +99,12 @@ export default function StudyPlanPage() {
 
   // Handle plan creation
   const handlePlanCreated = (newPlan: StudyPlan) => {
-    // The store's createPlan function will handle adding to UI and refetching
-    useStudyPlanStore.getState().createPlan(newPlan);
+    // IMPORTANT: We're already calling createPlan in the form component
+    // Don't call it again here to prevent duplicate plans
+    // useStudyPlanStore.getState().createPlan(newPlan); 
+    
+    // Just debugging - no action needed here
+    console.log("Plan created and handled by form component:", newPlan.id);
   };
 
   // Handle pagination
