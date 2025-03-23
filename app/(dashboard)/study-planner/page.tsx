@@ -94,18 +94,25 @@ export default function StudyPlanPage() {
 
   // Filter out any deleted plans from the list before rendering
   useEffect(() => {
-    if (studyPlans.length > 0) {
+    const checkDeletedPlans = () => {
       try {
         const deletedIds = JSON.parse(sessionStorage.getItem('deletedPlanIds') || '[]');
-        if (deletedIds.length > 0) {
-          setStudyPlans(prevPlans => 
-            prevPlans.filter(plan => !deletedIds.includes(plan.id))
-          );
+        if (deletedIds.length > 0 && studyPlans.length > 0) {
+          // Use a reference equality check to avoid unnecessary re-renders
+          const filteredPlans = studyPlans.filter(plan => !deletedIds.includes(plan.id));
+          if (filteredPlans.length !== studyPlans.length) {
+            // Debounce the update to prevent rapid re-renders
+            setStudyPlans(filteredPlans);
+          }
         }
       } catch (e) {
         console.error("Error filtering deleted plans:", e);
       }
-    }
+    };
+    
+    // Debounce the check to prevent rapid updates
+    const timeoutId = setTimeout(checkDeletedPlans, 50);
+    return () => clearTimeout(timeoutId);
   }, [studyPlans]);
 
   // Ensure newly created plan is displayed
@@ -149,21 +156,29 @@ export default function StudyPlanPage() {
     // Set the deleting state immediately 
     setIsDeleting(planId);
     
-    // Immediately remove from UI to prevent reappearance
-    setStudyPlans((prev) => prev.filter((plan) => plan.id !== planId));
+    // Get current deleted IDs
+    let deletedIds;
+    try {
+      deletedIds = JSON.parse(sessionStorage.getItem('deletedPlanIds') || '[]');
+    } catch {
+      deletedIds = [];
+    }
     
-    // Track deleted plan IDs in session storage to prevent reappearance
-    const deletedIds = JSON.parse(sessionStorage.getItem('deletedPlanIds') || '[]');
+    // Add to deleted IDs if not already there
     if (!deletedIds.includes(planId)) {
       deletedIds.push(planId);
       sessionStorage.setItem('deletedPlanIds', JSON.stringify(deletedIds));
     }
     
+    // Remove from UI *after* updating session storage
+    // Using functional update to ensure we're working with latest state
+    setStudyPlans(prev => prev.filter(plan => plan.id !== planId));
+    
     // Show loading toast
     const loadingToast = toast.loading("Deleting study plan...");
     
     try {
-      // First attempt
+      // Attempt to delete on server
       await apiClient.deleteStudyPlan(planId, userId);
       
       // Dismiss loading toast and show success
@@ -172,13 +187,11 @@ export default function StudyPlanPage() {
       
       // Handle pagination when last item on page is deleted
       if (studyPlans.length === 1 && page > 1) {
-        setPage((prev) => prev - 1);
+        setPage(prev => prev - 1);
       }
     } catch (err) {
       console.error(`Error deleting study plan:`, err);
       
-      // Even if API delete fails, keep it removed from UI since user intended to delete it
-      // But inform the user that they'll need to refresh to see changes properly
       toast.dismiss(loadingToast);
       toast.error("Network issue while deleting plan", { 
         description: "The plan will be removed after page refresh"
@@ -268,23 +281,31 @@ export default function StudyPlanPage() {
             </motion.div>
           )}
 
-          <AnimatePresence mode="popLayout">
+          <AnimatePresence mode="wait">
             {Array.isArray(studyPlans) && studyPlans.length > 0 ? (
               <motion.div
                 className="space-y-8"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
+                transition={{ duration: 0.3 }}
+                key="has-plans"
               >
-                <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <motion.div 
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                  layout="position"
+                  layoutRoot
+                >
                   {studyPlans.map((plan, index) => (
                     <motion.div
                       key={plan.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.3, delay: index * 0.1 }}
-                      layout
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      transition={{ 
+                        duration: 0.2, 
+                        delay: Math.min(index * 0.05, 0.3) // Cap delay at 0.3s
+                      }}
+                      layout="position"
                     >
                       <StoredPlan
                         plan={plan}
@@ -298,21 +319,23 @@ export default function StudyPlanPage() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5, delay: 0.4 }}
+                  transition={{ duration: 0.3 }}
                 >
                   <PaginationNav
                     page={page}
                     setPage={setPage}
                     pageCount={totalPages}
-                    isDisabled={isFetching}
+                    isDisabled={isFetching || isDeleting !== null}
                   />
                 </motion.div>
               </motion.div>
             ) : (
               !isFetching && (
                 <motion.div
+                  key="no-plans"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
                   className="text-center py-12"
                 >
                   <p className="text-xl text-[#4A3628] dark:text-[#FAF3DD] mb-2 font-pangolin">
