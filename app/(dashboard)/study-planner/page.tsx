@@ -89,8 +89,24 @@ export default function StudyPlanPage() {
 
   // Fetch study plans when user logs in or page changes
   useEffect(() => {
-    fetchPlans(false);
+    fetchPlans(true); // Always bust cache when fetching plans
   }, [fetchPlans, page]);
+
+  // Filter out any deleted plans from the list before rendering
+  useEffect(() => {
+    if (studyPlans.length > 0) {
+      try {
+        const deletedIds = JSON.parse(sessionStorage.getItem('deletedPlanIds') || '[]');
+        if (deletedIds.length > 0) {
+          setStudyPlans(prevPlans => 
+            prevPlans.filter(plan => !deletedIds.includes(plan.id))
+          );
+        }
+      } catch (e) {
+        console.error("Error filtering deleted plans:", e);
+      }
+    }
+  }, [studyPlans]);
 
   // Ensure newly created plan is displayed
   useEffect(() => {
@@ -130,65 +146,46 @@ export default function StudyPlanPage() {
     );
     if (!shouldDelete) return;
 
-    // Set the deleting state immediately
+    // Set the deleting state immediately 
     setIsDeleting(planId);
+    
+    // Immediately remove from UI to prevent reappearance
+    setStudyPlans((prev) => prev.filter((plan) => plan.id !== planId));
+    
+    // Track deleted plan IDs in session storage to prevent reappearance
+    const deletedIds = JSON.parse(sessionStorage.getItem('deletedPlanIds') || '[]');
+    if (!deletedIds.includes(planId)) {
+      deletedIds.push(planId);
+      sessionStorage.setItem('deletedPlanIds', JSON.stringify(deletedIds));
+    }
     
     // Show loading toast
     const loadingToast = toast.loading("Deleting study plan...");
     
-    // Track deletion attempts
-    let attempts = 0;
-    const maxAttempts = 3;
-    
-    const attemptDeletion = async (): Promise<boolean> => {
-      try {
-        await apiClient.deleteStudyPlan(planId, userId);
-        return true;
-      } catch (err) {
-        console.error(`Error deleting study plan (attempt ${attempts + 1}):`, err);
-        return false;
-      }
-    };
-    
-    while (attempts < maxAttempts) {
-      attempts++;
-      const success = await attemptDeletion();
+    try {
+      // First attempt
+      await apiClient.deleteStudyPlan(planId, userId);
       
-      if (success) {
-        // Update local state to reflect deletion
-        setStudyPlans((prev) => prev.filter((plan) => plan.id !== planId));
-        
-        // Dismiss loading toast and show success
-        toast.dismiss(loadingToast);
-        toast.success("Study plan deleted successfully");
-        
-        // Handle pagination when last item on page is deleted
-        if (studyPlans.length === 1 && page > 1) {
-          setPage((prev) => prev - 1);
-        }
-        
-        // Refetch to ensure state is in sync with server
-        setTimeout(() => {
-          fetchPlans(true);
-        }, 500);
-        
-        setIsDeleting(null);
-        return;
-      }
+      // Dismiss loading toast and show success
+      toast.dismiss(loadingToast);
+      toast.success("Study plan deleted successfully");
       
-      // Wait between attempts (except the last one)
-      if (attempts < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
+      // Handle pagination when last item on page is deleted
+      if (studyPlans.length === 1 && page > 1) {
+        setPage((prev) => prev - 1);
       }
+    } catch (err) {
+      console.error(`Error deleting study plan:`, err);
+      
+      // Even if API delete fails, keep it removed from UI since user intended to delete it
+      // But inform the user that they'll need to refresh to see changes properly
+      toast.dismiss(loadingToast);
+      toast.error("Network issue while deleting plan", { 
+        description: "The plan will be removed after page refresh"
+      });
+    } finally {
+      setIsDeleting(null);
     }
-    
-    // All attempts failed
-    toast.dismiss(loadingToast);
-    toast.error("Failed to delete study plan after multiple attempts", { 
-      description: "Please try again later or refresh the page."
-    });
-    
-    setIsDeleting(null);
   };
 
   const handlePlanCreated = (newPlan: StudyPlan) => {

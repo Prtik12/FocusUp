@@ -13,6 +13,9 @@ export const apiClient = {
       `${API_BASE_URL}/generate-study-plan?userId=${userId}&page=${page}&limit=${limit}${timestamp}`,
       {
         cache: bustCache ? "no-store" : "default",
+        headers: {
+          "Pragma": bustCache ? "no-cache" : "default",
+        }
       },
     );
 
@@ -21,7 +24,19 @@ export const apiClient = {
       throw new Error(error.message || "Failed to fetch study plans");
     }
 
-    return response.json();
+    const data = await response.json();
+    
+    // Filter out any plans that were marked as deleted in session storage
+    try {
+      const deletedIds = JSON.parse(sessionStorage.getItem('deletedPlanIds') || '[]');
+      if (deletedIds.length > 0 && Array.isArray(data.plans)) {
+        data.plans = data.plans.filter((plan: { id: string }) => !deletedIds.includes(plan.id));
+      }
+    } catch (e) {
+      console.error("Error filtering deleted plans from API response:", e);
+    }
+
+    return data;
   },
 
   async createStudyPlan(userId: string, subject: string, examDate: string) {

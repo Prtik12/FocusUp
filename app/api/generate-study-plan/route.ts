@@ -239,9 +239,14 @@ export async function DELETE(req: NextRequest) {
 
     if (!studyPlan) {
       console.log(`Study plan not found: ${planId}`);
+      // Return success if plan doesn't exist as the end result is what the user wanted
+      const headers = new Headers();
+      headers.set("Cache-Control", "no-store, max-age=0");
+      headers.set("Pragma", "no-cache");
+      
       return NextResponse.json(
-        { error: "Study plan not found" },
-        { status: 404 },
+        { success: true, message: "Plan already deleted" },
+        { status: 200, headers },
       );
     }
 
@@ -253,37 +258,57 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    // Use transaction for deletion to ensure atomicity
-    await prisma.$transaction(async (tx) => {
-      // Perform the deletion operation
-      await tx.studyPlan.delete({ 
+    // First try simple delete (more reliable in some cases)
+    try {
+      await prisma.studyPlan.delete({ 
         where: { id: planId } 
       });
       
-      // Verify the plan is actually deleted
-      const verifyDeleted = await tx.studyPlan.findUnique({
-        where: { id: planId }
+      console.log(`Successfully deleted study plan with simple delete: ${planId}`);
+    } catch (simpleDeleteError) {
+      console.error("Simple delete failed, attempting with transaction:", simpleDeleteError);
+      
+      // Fallback to transaction approach
+      await prisma.$transaction(async (tx) => {
+        // Perform the deletion operation
+        await tx.studyPlan.delete({ 
+          where: { id: planId } 
+        });
+        
+        // Verify the plan is actually deleted
+        const verifyDeleted = await tx.studyPlan.findUnique({
+          where: { id: planId }
+        });
+        
+        if (verifyDeleted) {
+          throw new Error("Failed to delete study plan - still exists after deletion");
+        }
+        
+        return { success: true };
+      }, {
+        // Set transaction timeout
+        timeout: 10000, // 10 seconds
+        maxWait: 5000,  // 5 seconds max wait time
+        isolationLevel: "Serializable", // Highest isolation level
       });
       
-      if (verifyDeleted) {
-        throw new Error("Failed to delete study plan - still exists after deletion");
-      }
-      
-      return { success: true };
-    }, {
-      // Set transaction timeout
-      timeout: 10000, // 10 seconds
-      maxWait: 5000,  // 5 seconds max wait time
-      isolationLevel: "Serializable", // Highest isolation level
-    });
+      console.log(`Successfully deleted study plan with transaction: ${planId}`);
+    }
 
-    console.log(`Successfully deleted study plan: ${planId}`);
-
-    // Set cache control to prevent caching of this response
+    // Set strong cache control headers to prevent caching
     const headers = new Headers();
     headers.set("Cache-Control", "no-store, max-age=0");
+    headers.set("Pragma", "no-cache");
+    headers.set("Expires", "0");
+    headers.set("Surrogate-Control", "no-store");
 
-    return NextResponse.json({ success: true }, { status: 200, headers });
+    return NextResponse.json({ 
+      success: true, 
+      timestamp: Date.now() // Add timestamp to prevent response caching
+    }, { 
+      status: 200, 
+      headers 
+    });
   } catch (error) {
     console.error("Error deleting study plan:", error);
     
@@ -304,13 +329,19 @@ export async function DELETE(req: NextRequest) {
     const statusCode = isTransientError ? 503 : 500; // Service Unavailable for transient errors
     const errorMessage = error instanceof Error ? error.message : "Failed to delete study plan";
     
+    // Set cache control headers even for error responses
+    const headers = new Headers();
+    headers.set("Cache-Control", "no-store, max-age=0");
+    headers.set("Pragma", "no-cache");
+    
     return NextResponse.json(
       { 
         error: errorMessage,
         code: isPrismaError ? (error as PrismaError).code : undefined,
-        isTransient: isTransientError
+        isTransient: isTransientError,
+        timestamp: Date.now() // Add timestamp to prevent response caching
       },
-      { status: statusCode },
+      { status: statusCode, headers },
     );
   }
 }
