@@ -133,7 +133,7 @@ export async function POST(req: NextRequest) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama3-70b-8192", // Using the model specified by the user
+        model: "llama-3.3-70b-versatile", // Using the model specified by the user
         messages: [
           {
             role: "system",
