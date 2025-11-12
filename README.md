@@ -1,113 +1,81 @@
-# 📕 FocusUp – Boost Your Productivity! 🚀  
+# FocusUp – Boost Your Productivity!  
 
-Stay on track with **FocusUp**, an AI-powered study planner featuring a Pomodoro timer, task manager, and event tracking—all in one place!  
+Stay on track with **FocusUp**, an AI study planner featuring a Pomodoro timer, task manager, and event tracking all in one place!  
 
 ![FocusUp Banner](https://github.com/user-attachments/assets/bca7ecc2-49b0-48d7-b5a1-bcb4fa5c86c8)  
 
 ---
 
-## ✨ Features  
+## Features  
 
-✅ **AI-Powered Study Planner** – Get personalized study plans with the **Groq API**.  
-⏳ **Pomodoro Timer** – Flip-clock style timer with automatic session transitions.  
-🗂️ **Task & Event Manager** – Plan tasks, add calendar events, and track progress.  
-📝 **Notes with Auto Cleanup** – Automatically deletes notes older than 90 days.  
-🔥 **Activity Streaks & Fun Animations** – Stay motivated with streak tracking and smooth UI effects.  
-🔑 **Google Authentication** – Secure and seamless sign-in with OAuth.  
+ **AI Study Planner** – Get personalized study plans with the **Groq API**.  
+ **Pomodoro Timer** – Flip-clock style timer with automatic session transitions.  
+ **Task & Event Manager** – Plan tasks, add calendar events, and track progress.  
+ **Notes with Auto Cleanup** – Automatically deletes notes older than 90 days.  
+ **Activity Streaks & Fun Animations** – Stay motivated with streak tracking and smooth UI effects.  
+ **Google Authentication** – Secure and seamless sign-in with OAuth.  
 
 ---
 
-## 🚀 Tech Stack  
+##  Tech Stack  
 
-🖥️ **Frontend:**  
+ **Frontend:**  
 - Next.js (React, TypeScript)  
 - Zustand (State Management)  
 - Framer Motion (Animations)  
 - Tailwind CSS  
 
-🛠️ **Backend:**  
+ **Backend:**  
 - Next.js API Routes  
 - Prisma ORM  
 - PostgreSQL  
 
-🔐 **Authentication:**  
+ **Authentication:**  
 - NextAuth.js (Google OAuth)  
 
-💾 **Storage:**  
+ **Storage:**  
 - Supabase (Profile Images, Notes)  
 
-🤖 **AI Integration:**  
+ **AI Integration:**  
 - Groq API  
 
-☁️ **Deployment:**  
+ **Deployment:**  
 - Vercel (Hosting, Cron Jobs)  
 
 ---
 
-## 🎯 Installation  
+##  Installation  
 
-### 1️⃣ Clone the repository  
+### 1. Clone the repository  
 ```sh
 git clone https://github.com/Prtik12/FocusUp.git
 cd FocusUp
 ```  
 
-### 2️⃣ Install dependencies  
+### 2. Install dependencies  
 ```sh
 npm install
 ```  
 
-### 3️⃣ Set up environment variables  
+### 3. Set up environment variables  
 ```sh
 cp .env.example .env
 ```  
-🔹 Update `.env` with your credentials (PostgreSQL, Supabase, Google OAuth, etc.).  
+ Update `.env` with your credentials (PostgreSQL, Supabase, Google OAuth, etc.).  
 
-### 4️⃣ Run Prisma migrations  
+### 4. Run Prisma migrations  
 ```sh
 npx prisma migrate dev
 ```  
 
-### 5️⃣ Start the development server  
+### 5. Start the development server  
 ```sh
 npm run dev
 ```  
 
----
-
-## 🔄 Auto-Deleting Notes (Vercel Cron Job)  
-
-FocusUp automatically deletes notes older than **90 days** using **Vercel Cron Jobs**.  
-
-### 📌 Setup Instructions  
-
-📌 **Add the following to `vercel.json`**:  
-```json
-{
-  "crons": [{
-    "path": "/api/cleanup-notes",
-    "schedule": "0 0 1 * *"
-  }]
-}
-```  
-
-📌 **Add a secret to Vercel for security**:  
-```sh
-vercel env add CRON_SECRET your_secret_key
-```  
-
-📌 **Secure the cron job in `app/api/cleanup-notes/route.ts`**:  
-```ts
-export async function GET(req: Request) {
-  if (req.headers.get("Authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
-    return new Response("Unauthorized", { status: 401 });
-  }
-  // Cleanup logic here...
-}
-```  
 
 ---
 
-## 📜 License  
+## License  
 
-This project is **MIT Licensed** – feel free to use, modify, and contribute! 🎉 
+This project is **MIT Licensed** – feel free to use, modify, and contribute! 
